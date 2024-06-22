@@ -40,7 +40,7 @@
                     <a class="nav-link" href="report.php">Report</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost/Stock-management-system/requests/request_item.php">Request Item</a>
+                    <a class="nav-link" href="checkout_item.php">Request Item</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="setting.php">Setting</a>
