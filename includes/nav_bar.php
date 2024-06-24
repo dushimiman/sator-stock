@@ -36,9 +36,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="items.php">Items</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="report.php">Report</a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" href="checkout_item.php">Request Item</a>
                 </li>

@@ -1,17 +1,6 @@
-<?php
-
 
 <?php
 session_start();
-
-// Assume login validation succeeds and set user role
-$_SESSION['user_role'] = 'stock_manager'; // Replace with actual role
-
-// Redirect to authorized page
-header('Location: checkout_item.php');
-exit();
-?>
-
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['username']) && isset($_POST['password'])) {
