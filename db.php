@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root"; 
 $password = ""; 
-$dbname = "sock_management_system"; 
+$dbname = "stock_management_system"; 
 
 
 $conn = new mysqli($servername, $username, $password, $dbname);

@@ -1,64 +1,23 @@
 <?php
+include('includes/nav_bar.php');
 session_start();
-include 'db.php'; 
-include 'auth_functions.php'; 
 
-if (isset($_SESSION['user_role'])) {
-    echo "Current user role: " . $_SESSION['user_role'] . "<br>";
-} else {
-    echo "No user role found in session.<br>";
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "sock_management_system";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+$return_items_query = "SELECT rt.id, i.name AS item_name, i.serial_number, rt.returned_by, rt.reason, rt.returned_at
+                      FROM return_transactions rt
+                      INNER JOIN items i ON rt.item_id = i.id
+                      ORDER BY rt.returned_at DESC"; 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $serial_number = $_POST['serial_number'];
-    $returned_by = $_POST['returned_by'];
-    $reason = $_POST['reason'];
+$result = $conn->query($return_items_query);
 
-    // Check if the item exists in items_sold
-    $check_query = "SELECT id, name FROM items_sold WHERE serial_number = ?";
-    $check_stmt = $conn->prepare($check_query);
-    if (!$check_stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $check_stmt->bind_param('s', $serial_number);
-    $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
-    $item = $check_result->fetch_assoc();
-
-    if (!$item) {
-        echo "The item with serial number '$serial_number' is not found in sold items!";
-        exit(); 
-    }
-
-    // Add the item back to the items table
-    $insert_query = "INSERT INTO items (name, serial_number) VALUES (?, ?)";
-    $insert_stmt = $conn->prepare($insert_query);
-    if (!$insert_stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $insert_stmt->bind_param('ss', $item['name'], $serial_number);
-    $insert_stmt->execute();
-
-    // Delete the item from items_sold table
-    $delete_query = "DELETE FROM items_sold WHERE id = ?";
-    $delete_stmt = $conn->prepare($delete_query);
-    if (!$delete_stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $delete_stmt->bind_param('i', $item['id']);
-    $delete_stmt->execute();
-
-    // Record the return transaction
-    $return_query = "INSERT INTO return_transactions (item_id, returned_by, reason) VALUES (?, ?, ?)";
-    $return_stmt = $conn->prepare($return_query);
-    if (!$return_stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $return_stmt->bind_param('iss', $item['id'], $returned_by, $reason);
-    $return_stmt->execute();
-
-    echo "Item returned successfully!";
-}
 ?>
 
 <!DOCTYPE html>
@@ -66,21 +25,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Return Item</title>
+    <title>Return Items</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h2>Return Item</h2>
-        <form method="POST">
-            Serial Number: <input type="text" name="serial_number" required><br>
-            Returned By: <input type="text" name="returned_by" required><br>
-            Reason: <input type="text" name="reason"><br>
-            <button type="submit" class="btn btn-primary">Return Item</button>
-        </form>
+        <h2>Return Items</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Item Name</th>
+                        <th>Serial Number</th>
+                        <th>Returned By</th>
+                        <th>Reason</th>
+                        <th>Returned At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['id']); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['serial_number']); ?></td>
+                                <td><?php echo htmlspecialchars($row['returned_by']); ?></td>
+                                <td><?php echo htmlspecialchars($row['reason']); ?></td>
+                                <td><?php echo htmlspecialchars($row['returned_at']); ?></td>
+                            </tr>
+                            <?php
+                        }
+                    } else {
+                        ?>
+                        <tr>
+                            <td colspan="6">No return items found.</td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>

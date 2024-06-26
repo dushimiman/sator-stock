@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ini_set('display_errors', 1);
 
             
-            $pdo = new PDO('mysql:host=localhost;dbname=sock_management_system', 'root', '');
+            $pdo = new PDO('mysql:host=localhost;dbname=stock_management_system', 'root', '');
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             

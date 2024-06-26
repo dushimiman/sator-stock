@@ -1,63 +1,117 @@
 <?php
-include('includes/nav_bar.php'); 
+include('includes/nav_bar.php');
 
-session_start();
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "stock_management_system";
 
 
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php"); 
-    exit();
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Home</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        .card-deck-center {
-            /* display: flex; */
-            justify-content: center;
-            align-items: center;
-            height: 100vh; 
+
+$sql = "SELECT branch, item_type, quantity FROM inventory";
+$result = $conn->query($sql);
+
+
+$branches = [];
+$itemTypes = [];
+$data = [];
+
+
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $branch = $row['branch'];
+        $item = $row['item_type'];
+        $quantity = (int)$row['quantity'];
+
+       
+        if (!in_array($branch, $branches)) {
+            $branches[] = $branch;
         }
-    </style>
+        if (!in_array($item, $itemTypes)) {
+            $itemTypes[] = $item;
+        }
+
+       
+        $data[$branch][$item] = $quantity;
+    }
+}
+
+
+$conn->close();
+
+
+$datasets = [];
+foreach ($itemTypes as $item) {
+    $dataset = [
+        'label' => $item,
+        'data' => [],
+        'backgroundColor' => '#' . substr(md5(rand()), 0, 6), 
+    ];
+
+    foreach ($branches as $branch) {
+        $dataset['data'][] = isset($data[$branch][$item]) ? $data[$branch][$item] : 0;
+    }
+
+    $datasets[] = $dataset;
+}
+
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- <title>Inventory Statistics - Column Chart</title> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-4 card-deck-center">
-        <div class="card-deck">
-           
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">View All Items</h5>
-                    <p class="card-text">View all items in stock currently</p>
-                    <a href="items.php" class="btn btn-primary">View Items</a>
-                </div>
-            </div>
-           
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Items Sold</h5>
-                    <p class="card-text">View items sold currently</p>
-                    <a href="item_sold.php" class="btn btn-primary">View Sold Items</a>
-                </div>
-            </div>
-           
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Items Returned</h5>
-                    <p class="card-text">View all items Returned</p>
-                    <a href="report.php" class="btn btn-primary">View Returned Items</a>
-                </div>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <canvas id="myChart" height="300"></canvas>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($branches) ?>,
+                datasets: <?= json_encode($datasets) ?>
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Bootstrap JS for optional responsive features -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
