@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $pdo = new PDO('mysql:host=localhost;dbname=stock_management_system', 'root', '');
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // Fetch user details
+               
                 $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE username = ?");
                 $stmt->execute([$username]);
                 $user = $stmt->fetch();
@@ -96,22 +96,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <h2 class="text-center mt-5">Login</h2>
+              
+                <h2 class="text-center mt-3">Register</h2>
                 <form method="POST" action="login.php" class="mt-4">
-                    <input type="hidden" name="action" value="login">
+                    <input type="hidden" name="action" value="register">
                     <div class="form-group">
-                        <label for="username">Username:</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <label for="reg_username">Username:</label>
+                        <input type="text" class="form-control" id="reg_username" name="username" required>
                     </div>
                     <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <label for="reg_password">Password:</label>
+                        <input type="password" class="form-control" id="reg_password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    <div class="form-group">
+                        <label for="role">Role:</label>
+                        <select class="form-control" id="role" name="role" required>
+                            <option value="HQS">HQS</option>
+                            <option value="branch manager">Branch Manager</option>
+                            <option value="rusizi">Rusizi</option>
+                            <option value="musanze">Musanze</option>
+                            <option value="muhanga">Muhanga</option>
+                            <option value="rwamagana">Rwamagana</option>
+                            <option value="huye">Huye</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">Register</button>
                 </form>
-                <hr>
-               
-                
             </div>
         </div>
     </div>

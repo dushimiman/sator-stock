@@ -66,7 +66,7 @@ foreach ($itemTypes as $item) {
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- <title>Inventory Statistics - Column Chart</title> -->
+  
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -74,7 +74,7 @@ foreach ($itemTypes as $item) {
 <body>
     <div class="container mt-4">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <canvas id="myChart" height="300"></canvas>
             </div>
         </div>
@@ -111,7 +111,7 @@ foreach ($itemTypes as $item) {
         });
     </script>
 
-    <!-- Bootstrap JS for optional responsive features -->
+  
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
