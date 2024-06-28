@@ -15,13 +15,13 @@ if ($conn->connect_error) {
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-// Function to fetch all items from the database
+
 function getAllItems($conn, $search = '') {
     $sql = "SELECT * FROM items";
     
-    // Append search condition if provided
+    
     if (!empty($search)) {
-        $sql .= " WHERE name LIKE '%$search%' OR type LIKE '%$search%' OR serial_number LIKE '%$search%' OR price LIKE '%$search%' OR creation_date LIKE '%$search%'";
+        $sql .= " WHERE name LIKE '%$search%' OR type LIKE '%$search%' OR serial_number LIKE '%$search%' LIKE '%$search%' OR creation_date LIKE '%$search%'";
     }
     
     $result = $conn->query($sql);
@@ -30,7 +30,7 @@ function getAllItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Price</th><th>Creation Date</th><th>Actions</th></tr>";
+        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Creation Date</th><th>Actions</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
@@ -39,12 +39,12 @@ function getAllItems($conn, $search = '') {
             echo "<td>" . $row["name"] . "</td>";
             echo "<td>" . $row["type"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
-            echo "<td>" . $row["price"] . "</td>";
+            
             echo "<td>" . $row["creation_date"] . "</td>";
             echo "<td><button type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#editModal" . $row["id"] . "'>Edit</button></td>";
             echo "</tr>";
             
-            // Modal for editing each item
+           
             echo "<div class='modal fade' id='editModal" . $row["id"] . "' tabindex='-1' role='dialog' aria-labelledby='editModalLabel" . $row["id"] . "' aria-hidden='true'>";
             echo "<div class='modal-dialog' role='document'>";
             echo "<div class='modal-content'>";
@@ -69,10 +69,7 @@ function getAllItems($conn, $search = '') {
             echo "<label for='edit_serial_number'>Serial Number:</label>";
             echo "<input type='text' id='edit_serial_number' name='edit_serial_number' class='form-control' value='" . $row["serial_number"] . "' required>";
             echo "</div>";
-            echo "<div class='form-group'>";
-            echo "<label for='edit_price'>Price:</label>";
-            echo "<input type='number' step='0.01' id='edit_price' name='edit_price' class='form-control' value='" . $row["price"] . "' required>";
-            echo "</div>";
+            
             echo "</div>";
             echo "<div class='modal-footer'>";
             echo "<button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>";
@@ -90,7 +87,7 @@ function getAllItems($conn, $search = '') {
     }
 }
 
-// Handling search form submission
+
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
     $search = $_GET['search'];
 } else {
@@ -130,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
                     </div>
                     <div class="card-body">
                         <?php
-                            // Call the function to display all items with optional search
+                           
                             getAllItems($conn, $search);
                         ?>
                     </div>

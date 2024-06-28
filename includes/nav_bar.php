@@ -56,7 +56,7 @@
                        Report
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown">
-                        <a class="dropdown-item" href="report.php">Stock Report</a>
+                        <a class="dropdown-item" href="index.php">Stock Report</a>
                         
                     </div>
                 </li>

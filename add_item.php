@@ -19,65 +19,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $type = $_POST['type'];
     $serial_number = $_POST['serial_number'];
-    $price = $_POST['price'];
-    $branch = "HQS"; // Assuming the branch is HQS, change as needed
+    $branch = "HQS"; 
 
-    // Insert the new item into the items table with creation_date
-    $stmt = $conn->prepare("INSERT INTO items (name, type, serial_number, price, creation_date) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)");
+    $stmt = $conn->prepare("INSERT INTO items (name, type, serial_number, creation_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
     if ($stmt === false) {
         die("Error preparing statement: " . $conn->error);
     }
-    $stmt->bind_param("sssd", $name, $type, $serial_number, $price);
+    $stmt->bind_param("sss", $name, $type, $serial_number);
 
     if ($stmt->execute()) {
         echo "New item added successfully.<br>";
-
-        // Check if the item exists in the inventory for the HQS branch
-        $checkStmt = $conn->prepare("SELECT quantity FROM inventory WHERE branch = ? AND item_type = ?");
-        if ($checkStmt === false) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        $checkStmt->bind_param("ss", $branch, $type);
-        $checkStmt->execute();
-        $checkStmt->store_result();
-
-        if ($checkStmt->num_rows > 0) {
-            // Item exists, update the quantity
-            $checkStmt->bind_result($quantity);
-            $checkStmt->fetch();
-            $newQuantity = $quantity + 1;
-
-            $updateStmt = $conn->prepare("UPDATE inventory SET quantity = ? WHERE branch = ? AND item_type = ?");
-            if ($updateStmt === false) {
-                die("Error preparing statement: " . $conn->error);
-            }
-            $updateStmt->bind_param("iss", $newQuantity, $branch, $type);
-            if ($updateStmt->execute()) {
-                echo "Inventory updated successfully.<br>";
-            } else {
-                echo "Error updating inventory: " . $updateStmt->error;
-            }
-            $updateStmt->close();
-        } else {
-            // Item doesn't exist, insert a new entry
-            $initialQuantity = 1;
-
-            $insertStmt = $conn->prepare("INSERT INTO inventory (branch, item_type, quantity) VALUES (?, ?, ?)");
-            if ($insertStmt === false) {
-                die("Error preparing statement: " . $conn->error);
-            }
-            $insertStmt->bind_param("ssi", $branch, $type, $initialQuantity);
-            if ($insertStmt->execute()) {
-                echo "New inventory entry created successfully.<br>";
-            } else {
-                echo "Error creating inventory entry: " . $insertStmt->error;
-            }
-            $insertStmt->close();
-        }
-
-        $checkStmt->close();
     } else {
-        echo "Error adding item: " . $stmt->error;
+        echo "Error executing statement: " . $stmt->error;
     }
 
     $stmt->close();
@@ -167,10 +120,6 @@ $conn->close();
                             <div class="form-group">
                                 <label for="serial_number">Serial Number:</label>
                                 <input type="text" id="serial_number" name="serial_number" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="price">Price:</label>
-                                <input type="number" step="0.01" id="price" name="price" class="form-control" required>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Add Item</button>
                         </form>

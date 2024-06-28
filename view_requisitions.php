@@ -1,4 +1,5 @@
 <?php
+include('includes/nav_bar.php');
 session_start();
 
 $servername = "localhost";

@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 
-$query = "SELECT id, name, type, serial_number, price, last_edited_by FROM items";
+$query = "SELECT id, name, type, serial_number,  last_edited_by FROM items";
 
 $result = $conn->query($query);
 
@@ -32,7 +32,7 @@ if ($result->num_rows > 0) {
     echo "<th>Name</th>";
     echo "<th>Type</th>";
     echo "<th>Serial Number</th>";
-    echo "<th>Price</th>";
+   
     echo "<th>Last Edited By</th>";
     echo "</tr>";
     echo "</thead>";
@@ -44,14 +44,14 @@ if ($result->num_rows > 0) {
         echo "<td>" . $row['name'] . "</td>";
         echo "<td>" . $row['type'] . "</td>";
         echo "<td>" . $row['serial_number'] . "</td>";
-        echo "<td>" . $row['price'] . "</td>";
+        
         echo "<td>" . $row['last_edited_by'] . "</td>";
         echo "</tr>";
     }
 
     echo "</tbody>";
     echo "</table>";
-    echo "</div>"; // Close table-responsive div
+    echo "</div>"; 
 } else {
     echo "<p class='mt-4'>No edited items found.</p>";
 }
