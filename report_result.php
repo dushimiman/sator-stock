@@ -17,17 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         return $result;
     }
     include('includes/nav_bar.php');
-    function getEditedItems($conn, $startDate, $endDate) {
-        $query = "SELECT * FROM items WHERE last_updated BETWEEN ? AND ?";
-        $stmt = $conn->prepare($query);
-        if (!$stmt) {
-            die("Error preparing statement: " . $conn->error);
-        }
-        $stmt->bind_param('ss', $startDate, $endDate);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
-    }
+    
 
     function getRequestedItems($conn, $startDate, $endDate) {
         $query = "SELECT * FROM requisitions WHERE requisition_date BETWEEN ? AND ?";
@@ -54,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $itemsInStock = getItemsInStock($conn);
-    $editedItems = getEditedItems($conn, $startDate, $endDate);
     $requestedItems = getRequestedItems($conn, $startDate, $endDate);
     $returnedItems = getReturnedItems($conn, $startDate, $endDate);
 ?>
@@ -92,31 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </tbody>
         </table>
 
-        <h3>Edited Items</h3>
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Item Name</th>
-                    <th>Item Type</th>
-                    <th>Serial Number</th>
-                    <th>Added By</th>
-                    <th>Last Edited By</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $editedItems->fetch_assoc()) { ?>
-                <tr>
-                    <td><?= $row['id'] ?></td>
-                    <td><?= $row['item_name'] ?></td>
-                    <td><?= $row['item_type'] ?></td>
-                    <td><?= $row['serial_number'] ?></td>
-                    <td><?= $row['added_by'] ?></td>
-                    <td><?= $row['last_edited_by'] ?></td>
-                </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+        
 
         <h3>Requested Items</h3>
         <table class="table table-bordered table-hover">

@@ -1,5 +1,4 @@
 <?php
-include('includes/nav_bar.php');
 session_start();
 
 $servername = "localhost";
@@ -43,21 +42,21 @@ if (isset($_GET['serial_number'])) {
     exit;
 }
 
-// Handle form submission
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $requisitionDate = $_POST['requisition_date'];
     $requisitionNumber = generateRequisitionNumber();
     $requestedBy = $_POST['requested_by'];
     $requesterPosition = $_POST['requester_position'];
-    $approvedBy = $_SESSION['username']; // Fetch from logged-in session
-    $approverPosition = $_SESSION['role']; // Fetch from logged-in session
+    $approvedBy = $_SESSION['username']; 
+    $approverPosition = $_SESSION['role']; 
     $serialNumber = $_POST['serial_number'];
-    $itemName = $_POST['item_name'] ?? ''; // Use null coalescing operator to handle undefined array key
-    $itemType = $_POST['item_type'] ?? ''; // Use null coalescing operator to handle undefined array key
+    $itemName = $_POST['item_name'] ?? ''; 
+    $itemType = $_POST['item_type'] ?? ''; 
     $paymentMethod = $_POST['payment_method'];
-    $paymentReason = $_POST['payment_reason'] ?? ''; // Use null coalescing operator to handle undefined array key
+    $paymentReason = $_POST['payment_reason'] ?? ''; 
 
-    // Insert the requisition into the database
+    
     $insertQuery = "INSERT INTO requisitions (requisition_date, requisition_number, requested_by, requester_position, approved_by, approver_position, serial_number, item_name, item_type, payment_method, payment_reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($insertQuery);
     
@@ -68,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssssssssss", $requisitionDate, $requisitionNumber, $requestedBy, $requesterPosition, $approvedBy, $approverPosition, $serialNumber, $itemName, $itemType, $paymentMethod, $paymentReason);
     
     if ($stmt->execute()) {
-        // Delete the requested item from the items table
+       
         $deleteQuery = "DELETE FROM items WHERE serial_number = ?";
         $deleteStmt = $conn->prepare($deleteQuery);
         $deleteStmt->bind_param("s", $serialNumber);
@@ -188,9 +187,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <button type="submit" class="btn btn-primary">Submit Requisition</button>
                         </form>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
