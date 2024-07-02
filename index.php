@@ -11,12 +11,12 @@
         <h2 class="text-center">Generate Report</h2>
         <form method="POST" action="report_result.php">
         <div class="form-group col-md-4">
-                    <label for="report_type">Report Type:</label>
-                    <select id="report_type" name="report_type" class="form-control">
+                    <!-- <label for="report_type">Report Type:</label> -->
+                    <!-- <select id="report_type" name="report_type" class="form-control">
                         <option value="daily">Daily</option>
                         <option value="monthly">Monthly</option>
                         <option value="custom">Custom Date Range</option>
-                    </select>
+                    </select> -->
                 </div>
             <div class="form-row">
                 <div class="form-group col-md-4">
