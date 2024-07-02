@@ -12,7 +12,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Function to generate requisition number
 function generateRequisitionNumber() {
     $date = date("Ymd");
     global $conn;
@@ -24,7 +23,7 @@ function generateRequisitionNumber() {
     return $date . "-" . sprintf("%02d", $number);
 }
 
-// Function to fetch item details based on serial number (for AJAX request)
+
 if (isset($_GET['serial_number'])) {
     $serialNumber = $_GET['serial_number'];
     $query = "SELECT name, type FROM items WHERE serial_number = ?";

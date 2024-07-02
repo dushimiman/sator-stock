@@ -6,109 +6,104 @@ $username = "root";
 $password = "";
 $dbname = "stock_management_system";
 
+
 $conn = new mysqli($servername, $username, $password, $dbname);
+
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Query inventory table
-$sql = "SELECT branch, item_type, quantity FROM inventory";
+$sql = "SELECT type, COUNT(*) as count FROM items GROUP BY type";
 $result = $conn->query($sql);
 
+$dataPoints = array();
 
-$branches = [];
-$itemTypes = [];
-$data = [];
-
-// Process query results
 if ($result->num_rows > 0) {
+    
     while ($row = $result->fetch_assoc()) {
-        $branch = $row['branch'];
-        $item = $row['item_type'];
-        $quantity = (int)$row['quantity'];
-
-        // Collect branches and item types
-        if (!in_array($branch, $branches)) {
-            $branches[] = $branch;
-        }
-        if (!in_array($item, $itemTypes)) {
-            $itemTypes[] = $item;
-        }
-
-        // Build data structure for chart
-        $data[$branch][$item] = $quantity;
+        $dataPoint = array("label" => $row['type'], "y" => $row['count']);
+        array_push($dataPoints, $dataPoint);
     }
 }
 
 $conn->close();
-
-// Prepare datasets for Chart.js
-$datasets = [];
-foreach ($itemTypes as $item) {
-    $dataset = [
-        'label' => $item,
-        'data' => [],
-        'backgroundColor' => '#' . substr(md5(rand()), 0, 6),
-    ];
-
-    foreach ($branches as $branch) {
-        $dataset['data'][] = isset($data[$branch][$item]) ? $data[$branch][$item] : 0;
-    }
-
-    $datasets[] = $dataset;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Items in Stock</title>
+    
+   
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+  
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Custom CSS styles */
+        body {
+            padding: 20px;
+        }
+        #itemChartContainer {
+            width: 60%;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center">Admin Dashboard</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <canvas id="myChart" height="300"></canvas>
-            </div>
+    <div class="container">
+        <h1 class="mt-4 mb-4">Items in Stock</h1>
+        <div id="itemChartContainer">
+            <canvas id="itemChart"></canvas>
         </div>
     </div>
 
     <script>
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'bar',
+        // Data points from PHP
+        var dataPoints = <?php echo json_encode($dataPoints, JSON_NUMERIC_CHECK); ?>;
+        
+        
+        var ctx = document.getElementById('itemChart').getContext('2d');
+        var itemChart = new Chart(ctx, {
+            type: 'bar', // Change to 'line', 'pie', etc. as needed
             data: {
-                labels: <?= json_encode($branches) ?>,
-                datasets: <?= json_encode($datasets) ?>
+                labels: dataPoints.map(dp => dp.label),
+                datasets: [{
+                    label: 'Item Counts',
+                    data: dataPoints.map(dp => dp.y),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
             },
             options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toFixed(2);
-                            }
-                        }
-                    }
-                },
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Quantity'
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Item Types'
+                        }
+                    }]
                 }
             }
         });
     </script>
 
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

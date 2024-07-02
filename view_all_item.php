@@ -21,7 +21,7 @@ function getAllItems($conn, $search = '') {
     
     
     if (!empty($search)) {
-        $sql .= " WHERE name LIKE '%$search%' OR type LIKE '%$search%' OR serial_number LIKE '%$search%' LIKE '%$search%' OR creation_date LIKE '%$search%'";
+        $sql .= " WHERE serial_number LIKE '%$search%' OR type LIKE '%$search%' OR serial_number LIKE '%$search%' LIKE '%$search%' OR creation_date LIKE '%$search%'";
     }
     
     $result = $conn->query($sql);
@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

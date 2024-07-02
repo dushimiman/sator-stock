@@ -13,14 +13,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle items return submission
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $serialNumber = $_POST['serial_number'];
     $returnedBy = $_POST['returned_by'];
-    $receivedBy = $_SESSION['username']; // Assuming received by the logged-in user
+    $receivedBy = $_SESSION['username']; 
     $returnReason = $_POST['return_reason'];
 
-    // Check if the serial number exists in requisitions table
+    
     $checkQuery = "SELECT * FROM requisitions WHERE serial_number = ?";
     $stmtCheck = $conn->prepare($checkQuery);
     $stmtCheck->bind_param("s", $serialNumber);
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmtCheck->get_result();
 
     if ($result->num_rows > 0) {
-        // Insert into returned_items table
+        
         $insertQuery = "INSERT INTO returned_items (serial_number, returned_by, received_by, return_reason) VALUES (?, ?, ?, ?)";
         $stmtInsert = $conn->prepare($insertQuery);
         $stmtInsert->bind_param("ssss", $serialNumber, $returnedBy, $receivedBy, $returnReason);

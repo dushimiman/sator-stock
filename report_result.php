@@ -3,8 +3,7 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $startDate = $_POST['start_date'];
     $endDate = $_POST['end_date'];
-    // $reportType = $_POST['report_type'];
-
+   
     $conn = new mysqli('localhost', 'root', '', 'stock_management_system');
 
     if ($conn->connect_error) {
