@@ -45,7 +45,7 @@
                         Request Item
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown">
-                        <a class="dropdown-item" href="request_item.php">New Request</a>
+                        <a class="dropdown-item" href="request_form.php">New Request</a>
                         <a class="dropdown-item" href="view_requisitions.php">Requests List</a>
                         <a class="dropdown-item" href="returned_form.php">Return item</a>
                         <a class="dropdown-item" href="item_returned.php">View item returned</a>

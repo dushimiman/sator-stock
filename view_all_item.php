@@ -17,7 +17,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 
 function getAllItems($conn, $search = '') {
-    $sql = "SELECT * FROM items";
+    $sql = "SELECT * FROM stock";
     
     
     if (!empty($search)) {
@@ -30,16 +30,16 @@ function getAllItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Creation Date</th><th>Actions</th></tr>";
+        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Quantity</th><th>Creation Date</th><th>Actions</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
-            echo "<td>" . $row["name"] . "</td>";
-            echo "<td>" . $row["type"] . "</td>";
+            echo "<td>" . $row["item_name"] . "</td>";
+            echo "<td>" . $row["item_type"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
-            
+            echo "<td>" . $row["quantity"] . "</td>";
             echo "<td>" . $row["creation_date"] . "</td>";
             echo "<td><button type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#editModal" . $row["id"] . "'>Edit</button></td>";
             echo "</tr>";
@@ -59,15 +59,19 @@ function getAllItems($conn, $search = '') {
             echo "<input type='hidden' name='item_id' value='" . $row["id"] . "'>";
             echo "<div class='form-group'>";
             echo "<label for='edit_name'>Name:</label>";
-            echo "<input type='text' id='edit_name' name='edit_name' class='form-control' value='" . $row["name"] . "' required>";
+            echo "<input type='text' id='edit_name' name='edit_name' class='form-control' value='" . $row["item_name"] . "' required>";
             echo "</div>";
             echo "<div class='form-group'>";
             echo "<label for='edit_type'>Type:</label>";
-            echo "<input type='text' id='edit_type' name='edit_type' class='form-control' value='" . $row["type"] . "' required>";
+            echo "<input type='text' id='edit_type' name='edit_type' class='form-control' value='" . $row["item_type"] . "' required>";
             echo "</div>";
             echo "<div class='form-group'>";
             echo "<label for='edit_serial_number'>Serial Number:</label>";
-            echo "<input type='text' id='edit_serial_number' name='edit_serial_number' class='form-control' value='" . $row["serial_number"] . "' required>";
+            echo "<input type='text' id='edit_serial_number' name='edit_serial_number' class='form-control' value='" . $row["serial_number"] . "' >";
+            echo "</div>";
+            echo "<div class='form-group'>";
+            echo "<label for='edit_quantity'>Quantity:</label>";
+            echo "<input type='text' id='edit_quantity' name='edit_quantity' class='form-control' value='" . $row["quantity"] . "' >";
             echo "</div>";
             
             echo "</div>";
@@ -136,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
         </div>
     </div>
 
-    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
+   
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

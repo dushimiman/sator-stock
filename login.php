@@ -3,34 +3,30 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'login') {
-     
         if (isset($_POST['username']) && isset($_POST['password'])) {
             $username = $_POST['username'];
             $password = $_POST['password'];
 
             try {
-             
                 $pdo = new PDO('mysql:host=localhost;dbname=stock_management_system', 'root', '');
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-               
                 $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE username = ?");
                 $stmt->execute([$username]);
                 $user = $stmt->fetch();
 
                 if ($user) {
-                    
                     if (password_verify($password, $user['password_hash'])) {
-                        
                         $_SESSION['user_id'] = $user['id'];
                         $_SESSION['username'] = $username;
                         $_SESSION['role'] = $user['role'];
 
-                        
-                        if ($user['role'] == 'HQS') {
+                        if ($user['id'] == 1) {
                             header("Location: admin_home.php");
-                        } elseif (in_array($user['role'], ['rusizi', 'musanze', 'muhanga', 'rwamagana', 'huye'])) {
-                            header("Location: branch_manager_home.php");
+                        } elseif ($user['id'] == 2) {
+                            header("Location: user_home.php");
+                        } elseif ($user['id'] >= 2) {
+                            header("Location: user_home.php");  
                         } else {
                             echo "Unknown role.";
                         }
@@ -48,18 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo "Please enter both username and password.";
         }
     } elseif (isset($_POST['action']) && $_POST['action'] == 'register') {
-        
         if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['role'])) {
             $username = $_POST['username'];
             $password = $_POST['password'];
-            $role = $_POST['role']; 
+            $role = $_POST['role'];
 
             try {
-                
                 $pdo = new PDO('mysql:host=localhost;dbname=stock_management_system', 'root', '');
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-              
                 $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM users WHERE username = ?");
                 $stmt->execute([$username]);
                 $result = $stmt->fetch();
@@ -67,10 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($result['count'] > 0) {
                     echo "Username already exists.";
                 } else {
-                    
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                   
                     $stmt = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)");
                     $stmt->execute([$username, $hashed_password, $role]);
 
@@ -110,8 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <button type="submit" class="btn btn-primary btn-block">Login</button>
                 </form>
                 <hr>
-               
-                
             </div>
         </div>
     </div>

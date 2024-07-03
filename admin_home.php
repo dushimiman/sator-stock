@@ -14,7 +14,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT type, COUNT(*) as count FROM items GROUP BY type";
+$sql = "SELECT item_name, COUNT(*) as count FROM stock GROUP BY item_name";
 $result = $conn->query($sql);
 
 $dataPoints = array();
@@ -22,7 +22,7 @@ $dataPoints = array();
 if ($result->num_rows > 0) {
     
     while ($row = $result->fetch_assoc()) {
-        $dataPoint = array("label" => $row['type'], "y" => $row['count']);
+        $dataPoint = array("label" => $row['item_name'], "y" => $row['count']);
         array_push($dataPoints, $dataPoint);
     }
 }
@@ -43,7 +43,7 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Custom CSS styles */
+        
         body {
             padding: 20px;
         }
@@ -62,13 +62,13 @@ $conn->close();
     </div>
 
     <script>
-        // Data points from PHP
+       
         var dataPoints = <?php echo json_encode($dataPoints, JSON_NUMERIC_CHECK); ?>;
         
         
         var ctx = document.getElementById('itemChart').getContext('2d');
         var itemChart = new Chart(ctx, {
-            type: 'bar', // Change to 'line', 'pie', etc. as needed
+            type: 'bar', 
             data: {
                 labels: dataPoints.map(dp => dp.label),
                 datasets: [{
