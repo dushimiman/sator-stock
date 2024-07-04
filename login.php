@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             header("Location: admin_home.php");
                         } elseif ($user['id'] == 2) {
                             header("Location: user_home.php");
-                        } elseif ($user['id'] >= 2) {
-                            header("Location: user_home.php");  
+                        } elseif ($user['id'] == 3) {
+                            header("Location: request_list.php");  
                         } else {
                             echo "Unknown role.";
                         }

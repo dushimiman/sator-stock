@@ -1,5 +1,5 @@
 <?php
-
+include('includes/nav_bar.php');
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -41,15 +41,17 @@ if (isset($_GET['id'])) {
         <label for="item_name">Item Name:</label>
         <input type="text" id="item_name" name="item_name" value="<?php echo $request['item_name']; ?>" readonly><br><br>
 
-        <div id="serial_number_section" style="display: none;">
-            <label for="serial_number">Serial Number:</label>
-            <input type="text" id="serial_number" name="serial_number"><br><br>
+        <?php if ($request['item_name'] === 'SPEED GOVERNORS' || $request['item_name'] === 'GPS TRACKERS'): ?>
+        <div id="serial_number_section">
+            <label for="serial_numbers">Serial Numbers (comma-separated):</label>
+            <input type="text" id="serial_numbers" name="serial_numbers"><br><br>
         </div>
-
-        <div id="quantity_section" style="display: none;">
+        <?php else: ?>
+        <div id="quantity_section">
             <label for="quantity">Quantity:</label>
             <input type="number" id="quantity" name="quantity"><br><br>
         </div>
+        <?php endif; ?>
 
         <input type="submit" value="Out Item">
     </form>

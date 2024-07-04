@@ -1,6 +1,6 @@
 <?php
 include('includes/nav_bar.php');
-include('includes/db.php'); // Assuming this file includes your database connection
+include('includes/db.php');
 
 if (isset($_GET['id'])) {
     $request_id = $_GET['id'];

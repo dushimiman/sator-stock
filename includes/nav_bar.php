@@ -53,8 +53,9 @@
                         Request Item
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown2">
-                        <a class="dropdown-item" href="request_form.php">New Request</a>
-                        <a class="dropdown-item" href="view_requisitions.php">Requests List</a>
+                        
+                        <a class="dropdown-item" href="admin_request_list.php">Requests List</a>
+                        <a class="dropdown-item" href="view_out_in_stock.php">View Out in stock</a>
                         <a class="dropdown-item" href="returned_form.php">Return item</a>
                         <a class="dropdown-item" href="item_returned.php">View item returned</a>
                     </div>
@@ -64,7 +65,7 @@
                        Report
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown3">
-                        <a class="dropdown-item" href="index.php">Stock Report</a>
+                        <a class="dropdown-item" href="report_result.php">Stock Report</a>
                     </div>
                 </li>
                 <li class="nav-item">

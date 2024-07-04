@@ -1,8 +1,8 @@
 <?php
+include('includes/nav_bar.php');
+include('includes/db.php');
 
-include('includes/db.php'); 
-
-
+// Function to update status to Approved
 function approveRequest($conn, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
     if ($conn->query($sql) === true) {
@@ -11,19 +11,6 @@ function approveRequest($conn, $request_id) {
         return false;
     }
 }
-
-
-if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id'])) {
-    $request_id = $_GET['id'];
-    if (approveRequest($conn, $request_id)) {
-        
-        header("Location: request_list.php");
-        exit();
-    } else {
-        echo "Error approving request.";
-    }
-}
-
 
 $sql = "SELECT * FROM requests";
 $result = $conn->query($sql);
@@ -42,7 +29,9 @@ if ($result === false) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+    
     <div class="container mt-4">
+        
         <h2 class="text-center mb-4">All Requests</h2>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
@@ -54,7 +43,7 @@ if ($result === false) {
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Actions</th> <!-- Added Actions column -->
                     </tr>
                 </thead>
                 <tbody>
@@ -67,18 +56,15 @@ if ($result === false) {
                             echo "<td>" . $row['requested_by'] . "</td>";
                             echo "<td>" . $row['item_name'] . "</td>";
                             echo "<td>" . $row['quantity'] . "</td>";
-                           
                             echo "<td>" . $row['status'] . "</td>";
                             echo "<td>";
-                            if ($row['status'] == 'pending') {
-                                echo "<a class='btn btn-success btn-sm' href='request_list.php?action=Approve&id=" . $row['id'] . "'>Approve</a> ";
-                            }
-                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
+                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a> ";
+                            echo "<a class='btn btn-warning btn-sm' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>"; // Out Item button
                             echo "</td>";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' class='text-center'>No requests found</td></tr>";
+                        echo "<tr><td colspan='7' class='text-center'>No requests found</td></tr>";
                     }
                     ?>
                 </tbody>

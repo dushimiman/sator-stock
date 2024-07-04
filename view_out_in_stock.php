@@ -1,31 +1,17 @@
 <?php
+include('includes/nav_bar.php');
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "stock_management_system";
 
-include('includes/db.php'); 
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-
-function approveRequest($conn, $request_id) {
-    $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
-    if ($conn->query($sql) === true) {
-        return true;
-    } else {
-        return false;
-    }
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-
-if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id'])) {
-    $request_id = $_GET['id'];
-    if (approveRequest($conn, $request_id)) {
-        
-        header("Location: request_list.php");
-        exit();
-    } else {
-        echo "Error approving request.";
-    }
-}
-
-
-$sql = "SELECT * FROM requests";
+$sql = "SELECT * FROM out_in_stock";
 $result = $conn->query($sql);
 
 if ($result === false) {
@@ -37,24 +23,22 @@ if ($result === false) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>All Requests</title>
+    <title>Items Out in Stock</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-4">
-        <h2 class="text-center mb-4">All Requests</h2>
+        <h2 class="text-center mb-4">Items Out in Stock</h2>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
                     <tr>
                         <th>ID</th>
-                        <th>Requisition Date</th>
-                        <th>Requested By</th>
                         <th>Item Name</th>
+                        <th>Serial Number</th>
                         <th>Quantity</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Out Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,22 +47,14 @@ if ($result === false) {
                         while ($row = $result->fetch_assoc()) {
                             echo "<tr>";
                             echo "<td>" . $row['id'] . "</td>";
-                            echo "<td>" . $row['requisition_date'] . "</td>";
-                            echo "<td>" . $row['requested_by'] . "</td>";
                             echo "<td>" . $row['item_name'] . "</td>";
+                            echo "<td>" . $row['serial_number'] . "</td>";
                             echo "<td>" . $row['quantity'] . "</td>";
-                           
-                            echo "<td>" . $row['status'] . "</td>";
-                            echo "<td>";
-                            if ($row['status'] == 'pending') {
-                                echo "<a class='btn btn-success btn-sm' href='request_list.php?action=Approve&id=" . $row['id'] . "'>Approve</a> ";
-                            }
-                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
-                            echo "</td>";
+                            echo "<td>" . $row['out_date'] . "</td>";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' class='text-center'>No requests found</td></tr>";
+                        echo "<tr><td colspan='5' class='text-center'>No items found</td></tr>";
                     }
                     ?>
                 </tbody>
