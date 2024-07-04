@@ -1,7 +1,45 @@
 <?php
 include('includes/nav_bar.php');
-?>
+include('includes/db.php'); 
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $item_name = $_POST['item'];
+    $item_type = $_POST['type'];
+    $serial_number = isset($_POST['serial_number']) ? $_POST['serial_number'] : null;
+    $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : null;
+    $branch = 'HQS'; 
+    $creation_date = date("Y-m-d H:i:s");
+
+  
+    if (!empty($serial_number)) {
+        $quantity = 1;
+    } else {
+        $serial_number = null; 
+    }
+
+   
+    $stmt = $conn->prepare("INSERT INTO stock (item_name, item_type, serial_number, branch, creation_date, quantity) VALUES (?, ?, ?, ?, ?, ?)");
+    if ($stmt === false) {
+        die('Prepare failed: ' . htmlspecialchars($conn->error));
+    }
+
+    $bind = $stmt->bind_param("sssssi", $item_name, $item_type, $serial_number, $branch, $creation_date, $quantity);
+    if ($bind === false) {
+        die('Bind param failed: ' . htmlspecialchars($stmt->error));
+    }
+
+    // Execute and check for errors
+    $execute = $stmt->execute();
+    if ($execute === false) {
+        die('Execute failed: ' . htmlspecialchars($stmt->error));
+    }
+
+    echo "New item added successfully";
+
+    $stmt->close();
+    $conn->close();
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,8 +47,20 @@ include('includes/nav_bar.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .form-container {
+            max-width: 600px; 
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
     <script>
         const itemTypes = {
             'SPEED GOVERNORS': ['SPG 001', 'Only SPG 001 Without Antenna', 'Only SPG 001 Without Display', 'Only SPG 001 Without Antenna and Display', 'R0SCO', 'R0SCO Not Working', 'SG 001 Not Working'],
@@ -33,7 +83,6 @@ include('includes/nav_bar.php');
             const quantityField = document.getElementById("quantity_field");
             const selectedItem = itemSelect.value;
 
-            
             typeSelect.innerHTML = '';
             if (itemTypes[selectedItem]) {
                 itemTypes[selectedItem].forEach(type => {
@@ -44,7 +93,6 @@ include('includes/nav_bar.php');
                 });
             }
 
-           
             const requiresSerialNumber = ["GPS TRACKERS", "SPEED GOVERNORS"];
             if (requiresSerialNumber.includes(selectedItem)) {
                 serialNumberField.style.display = "block";
@@ -60,7 +108,6 @@ include('includes/nav_bar.php');
             const itemType = itemSelect.value;
             const serialNumber = document.getElementById("serial_number").value;
 
-            
             if (itemType === "GPS TRACKERS") {
                 const gpsPattern = /^[A-Z]{2}[0-9]{15}$/;
                 if (!gpsPattern.test(serialNumber)) {
@@ -85,38 +132,40 @@ include('includes/nav_bar.php');
 </head>
 <body>
     <div class="container">
-        <h2 class="mt-4 mb-4 text-center">Add Item to Stock</h2>
-        <form method="POST" action="add_item.php" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="item">Item:</label>
-                <select id="item" name="item" onchange="updateForm()" class="form-control">
-                    <option value="SPEED GOVERNORS">SPEED GOVERNORS</option>
-                    <option value="GPS TRACKERS">GPS TRACKERS</option>
-                    <option value="FUEL LEVER SENSOR">FUEL LEVER SENSOR</option>
-                    <option value="X-1R Product">X-1R Product</option>
-                    <option value="SENSOR FOR ROSCO">SENSOR FOR ROSCO</option>
-                    <option value="CERTIFICATE PAPER">CERTIFICATE PAPER</option>
-                    <option value="CABLE FOR ROSCO">CABLE FOR ROSCO</option>
-                    <option value="Note Book">Note Book</option>
-                    <option value="Remote">Remote</option>
-                    <option value="SIMCARD">SIMCARD</option>
-                    <option value="ENVELOPPE">ENVELOPPE</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="type">Item Type:</label>
-                <select id="type" name="type" class="form-control"></select>
-            </div>
-            <div id="serial_number_field" class="form-group" style="display: none;">
-                <label for="serial_number">Serial Number:</label>
-                <input type="text" id="serial_number" name="serial_number" class="form-control">
-            </div>
-            <div id="quantity_field" class="form-group" style="display: none;">
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Add Item</button>
-        </form>
+        <div class="form-container">
+            <h2 class="mt-4 mb-4 text-center">Add Item to Stock</h2>
+            <form method="POST" action="add_item.php" onsubmit="return validateForm()">
+                <div class="form-group">
+                    <label for="item">Item:</label>
+                    <select id="item" name="item" onchange="updateForm()" class="form-control">
+                        <option value="SPEED GOVERNORS">SPEED GOVERNORS</option>
+                        <option value="GPS TRACKERS">GPS TRACKERS</option>
+                        <option value="FUEL LEVER SENSOR">FUEL LEVER SENSOR</option>
+                        <option value="X-1R Product">X-1R Product</option>
+                        <option value="SENSOR FOR ROSCO">SENSOR FOR ROSCO</option>
+                        <option value="CERTIFICATE PAPER">CERTIFICATE PAPER</option>
+                        <option value="CABLE FOR ROSCO">CABLE FOR ROSCO</option>
+                        <option value="Note Book">Note Book</option>
+                        <option value="Remote">Remote</option>
+                        <option value="SIMCARD">SIMCARD</option>
+                        <option value="ENVELOPPE">ENVELOPPE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type">Item Type:</label>
+                    <select id="type" name="type" class="form-control"></select>
+                </div>
+                <div id="serial_number_field" class="form-group" style="display: none;">
+                    <label for="serial_number">Serial Number:</label>
+                    <input type="text" id="serial_number" name="serial_number" class="form-control">
+                </div>
+                <div id="quantity_field" class="form-group" style="display: none;">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Add Item</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

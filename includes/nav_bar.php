@@ -15,6 +15,14 @@
         .navbar-nav {
             margin-left: auto; 
         }
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0; 
+        }
+       
+        .dropdown-menu {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -31,20 +39,20 @@
                     <a class="nav-link" href="admin_home.php">Home</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Items
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="itemsDropdown">
+                    <div class="dropdown-menu" aria-labelledby="itemsDropdown1">
                         <a class="dropdown-item" href="add_item.php">Add Item</a>
                         <a class="dropdown-item" href="view_all_item.php">All Item</a>
                         <a class="dropdown-item" href="edited_items.php">View Edited Item</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Request Item
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="itemsDropdown">
+                    <div class="dropdown-menu" aria-labelledby="itemsDropdown2">
                         <a class="dropdown-item" href="request_form.php">New Request</a>
                         <a class="dropdown-item" href="view_requisitions.php">Requests List</a>
                         <a class="dropdown-item" href="returned_form.php">Return item</a>
@@ -52,12 +60,11 @@
                     </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                        Report
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="itemsDropdown">
+                    <div class="dropdown-menu" aria-labelledby="itemsDropdown3">
                         <a class="dropdown-item" href="index.php">Stock Report</a>
-                        
                     </div>
                 </li>
                 <li class="nav-item">

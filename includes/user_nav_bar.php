@@ -28,7 +28,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="admin_home.php">Home</a>
+                    <a class="nav-link" href="user_home.php">Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="request_form.php">New Request</a>

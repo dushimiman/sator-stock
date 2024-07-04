@@ -1,8 +1,8 @@
 <?php
-include('includes/nav_bar.php');
-include('includes/db.php'); // Assuming this includes your database connection
+include('includes/user_nav_bar.php');
+include('includes/db.php');
 
-// Function to update status to Approved
+
 function approveRequest($conn, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
     if ($conn->query($sql) === true) {
@@ -12,7 +12,7 @@ function approveRequest($conn, $request_id) {
     }
 }
 
-// Fetch all requests
+
 $sql = "SELECT * FROM requests";
 $result = $conn->query($sql);
 
@@ -30,7 +30,9 @@ if ($result === false) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+    
     <div class="container mt-4">
+        
         <h2 class="text-center mb-4">All Requests</h2>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
@@ -42,7 +44,7 @@ if ($result === false) {
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -57,12 +59,7 @@ if ($result === false) {
                             echo "<td>" . $row['quantity'] . "</td>";
                            
                             echo "<td>" . $row['status'] . "</td>";
-                            echo "<td>";
-                            if ($row['status'] == 'pending') {
-                                echo "<a class='btn btn-success btn-sm' href='request_list.php?action=approve&id=" . $row['id'] . "'>Approve</a> ";
-                            }
-                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
-                            echo "</td>";
+                            
                             echo "</tr>";
                         }
                     } else {

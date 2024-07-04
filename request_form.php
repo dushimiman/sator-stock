@@ -1,5 +1,5 @@
 <?php
-include('includes/nav_bar.php');
+include('includes/user_nav_bar.php');
 ?>
 
 <!DOCTYPE html>
@@ -30,23 +30,23 @@ include('includes/nav_bar.php');
             </div>
 
             <div class="form-group">
-                <label for="payment_method">Payment Method:</label>
-                <select id="payment_method" name="payment_method" class="form-control" onchange="toggleProofOfPayment()">
-                    <option value="none">None</option>
-                    <option value="cash">Cash</option>
-                    <option value="cheque">Cheque</option>
-                    <option value="momo">Mobile Money</option>
-                </select>
+                <label for="quantity">Quantity Needed:</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" required>
             </div>
 
-            <div id="proof_of_payment_section" class="form-group" style="display:none;">
-                <label for="proof_of_payment_file">Proof of Payment (Upload):</label>
-                <input type="file" id="proof_of_payment" name="proof_of_payment" class="form-control-file" accept=".jpg, .jpeg, .png, .pdf">
+            <div class="form-group">
+                <label for="location">Location for Item:</label>
+                <input type="text" id="location" name="location" class="form-control" required>
             </div>
 
-            <div id="reason_if_not_paid_section" class="form-group" style="display:none;">
-                <label for="reason_if_not_paid">Reason if not paid:</label>
-                <textarea id="reason_if_not_paid" name="reason_if_not_paid" class="form-control"></textarea>
+            <div class="form-group">
+                <label for="payment_description">Payment Description:</label>
+                <textarea id="payment_description" name="payment_description" class="form-control"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="reasons">Reasons for Request:</label>
+                <textarea id="reasons" name="reasons" class="form-control"></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Submit</button>
@@ -54,20 +54,5 @@ include('includes/nav_bar.php');
     </div>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        function toggleProofOfPayment() {
-            var paymentMethod = document.getElementById('payment_method').value;
-            var proofSection = document.getElementById('proof_of_payment_section');
-            var reasonSection = document.getElementById('reason_if_not_paid_section');
-            
-            if (paymentMethod === 'none') {
-                proofSection.style.display = 'none';
-                reasonSection.style.display = 'block';
-            } else {
-                proofSection.style.display = 'block';
-                reasonSection.style.display = 'none';
-            }
-        }
-    </script>
 </body>
 </html>

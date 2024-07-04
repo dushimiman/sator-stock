@@ -1,120 +1,83 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "stock_management_system";
+include('includes/nav_bar.php');
+include('includes/db.php'); // Assuming this file includes your database connection
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-
-function getRequestDetails($conn, $request_id) {
+if (isset($_GET['id'])) {
+    $request_id = $_GET['id'];
     $sql = "SELECT * FROM requests WHERE id = $request_id";
     $result = $conn->query($sql);
 
     if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        return $row;
-    } else {
-        return null;
-    }
-}
-
-
-if (isset($_GET['id'])) {
-    $request_id = $_GET['id'];
-    $request = getRequestDetails($conn, $request_id);
-
-    if (!$request) {
-        die("Request not found.");
-    }
-} else {
-    die("Request ID not specified.");
-}
+        $request = $result->fetch_assoc();
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>View Request Details</title>
-    <style>
-        .details-table {
-            width: 50%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .details-table th, .details-table td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        .details-table th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h2>Request Details</h2>
-    <table class="details-table">
-        <tr>
-            <th>Field</th>
-            <th>Details</th>
-        </tr>
-        <tr>
-            <td>Requisition Date</td>
-            <td><?php echo $request['requisition_date']; ?></td>
-        </tr>
-        <tr>
-            <td>Requisition Number</td>
-            <td><?php echo $request['requisition_number']; ?></td>
-        </tr>
-        <tr>
-            <td>Requested By</td>
-            <td><?php echo $request['requested_by']; ?></td>
-        </tr>
-        <tr>
-            <td>Item Name</td>
-            <td><?php echo $request['item_name']; ?></td>
-        </tr>
-        <tr>
-            <td>Payment Method</td>
-            <td><?php echo $request['payment_method']; ?></td>
-        </tr>
-        <tr>
-            <td>Status</td>
-            <td><?php echo $request['status']; ?></td>
-        </tr>
-        <?php if ($request['payment_method'] !== 'none') { ?>
-            <tr>
-    <td>Proof of Payment</td>
-    <td>
-        <?php
-        if (!empty($request['proof_of_payment_file'])) {
-            $proof_file_path = 'proofs/' . $request['proof_of_payment_file'];
-            echo "<a href='$proof_file_path' download>Download Proof of Payment</a>";
-        } else {
-            echo "Proof of Payment Not Provided";
-        }
-        ?>
-    </td>
-</tr>
+    <div class="container">
+        <h2 class="mt-4 mb-4 text-center">Request Details</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th style="width: 30%;">Requisition Date:</th>
+                        <td><?php echo $request['requisition_date']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Requisition Number:</th>
+                        <td><?php echo $request['requisition_number']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Requested By:</th>
+                        <td><?php echo $request['requested_by']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Item Name:</th>
+                        <td><?php echo $request['item_name']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Quantity Needed:</th>
+                        <td><?php echo $request['quantity']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Location for Item:</th>
+                        <td><?php echo $request['location']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Payment Description:</th>
+                        <td><?php echo $request['payment_description']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Reasons for Request:</th>
+                        <td><?php echo $request['reasons']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td><?php echo $request['status']; ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <a href="request_list.php" class="btn btn-primary">Back to Requests List</a>
+    </div>
 
-        </tr>
-        <?php } else { ?>
-        <tr>
-            <td>Reason if Not Paid</td>
-            <td><?php echo $request['reason_if_not_paid']; ?></td>
-        </tr>
-        <?php } ?>
-    </table>
-    <br>
-    <a href="request_list.php">Back to Requests List</a>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
 
 <?php
+    } else {
+        echo "Request not found.";
+    }
+} else {
+    echo "Request ID not specified.";
+}
+
 $conn->close();
 ?>

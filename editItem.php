@@ -1,42 +1,33 @@
 <?php
-session_start();
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "stock_management_system";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('includes/db.php'); 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item_id = $_POST['item_id'];
-    $name = $_POST['edit_name'];
-    $type = $_POST['edit_type'];
-    $serial_number = $_POST['edit_serial_number'];
-   
-    $edited_by = $_SESSION['username']; 
+    $edit_name = $_POST['edit_name'];
+    $edit_type = $_POST['edit_type'];
+    $edit_serial_number = isset($_POST['edit_serial_number']) ? $_POST['edit_serial_number'] : null;
+    $edit_quantity = isset($_POST['edit_quantity']) ? $_POST['edit_quantity'] : null;
 
    
-    $stmt = $conn->prepare("UPDATE items SET name=?, type=?, serial_number=?, last_edited_by=? WHERE id=?");
+    $stmt = $conn->prepare("UPDATE stock SET item_name = ?, item_type = ?, serial_number = ?, quantity = ? WHERE id = ?");
     if ($stmt === false) {
-        die("Error preparing statement: " . $conn->error);
-    }
-    $stmt->bind_param("ssssi", $name, $type, $serial_number, $edited_by, $item_id);
-
-  
-    if ($stmt->execute()) {
-        echo "Item updated successfully.";
-    } else {
-        echo "Error updating item: " . $stmt->error;
+        die('Prepare failed: ' . htmlspecialchars($conn->error));
     }
 
-  
+    $bind = $stmt->bind_param("ssssi", $edit_name, $edit_type, $edit_serial_number, $edit_quantity, $item_id);
+    if ($bind === false) {
+        die('Bind param failed: ' . htmlspecialchars($stmt->error));
+    }
+
+    $execute = $stmt->execute();
+    if ($execute === false) {
+        die('Execute failed: ' . htmlspecialchars($stmt->error));
+    }
+
+    echo "Item updated successfully";
+
     $stmt->close();
+    $conn->close();
+    exit;
 }
-
-$conn->close();
 ?>

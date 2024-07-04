@@ -13,14 +13,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $serialNumber = $_POST['serial_number'];
     $returnedBy = $_POST['returned_by'];
     $receivedBy = $_SESSION['username']; 
     $returnReason = $_POST['return_reason'];
 
-    
     $checkQuery = "SELECT * FROM requisitions WHERE serial_number = ?";
     $stmtCheck = $conn->prepare($checkQuery);
     $stmtCheck->bind_param("s", $serialNumber);
@@ -51,6 +49,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Items Return Form</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card-body {
+            padding: 1.25rem; /* Adjust padding as needed */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -78,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="return_reason">Return Reason:</label>
                                 <textarea id="return_reason" name="return_reason" class="form-control" rows="3" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Submit Return</button>
+                            <button type="submit" class="btn btn-primary btn-block">Submit Return</button>
                         </form>
                     </div>
                 </div>

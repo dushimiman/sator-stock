@@ -22,7 +22,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2) {
                 <h2 class="text-center mt-5">User Home</h2>
                 <div class="list-group mt-4">
                     <a href="request_form.php" class="list-group-item list-group-item-action">Request Form</a>
-                    <a href="view_requisitions.php" class="list-group-item list-group-item-action">View Your Requisitions</a>
+                    <a href="user_request.php" class="list-group-item list-group-item-action">View Your Requisitions</a>
                 </div>
             </div>
         </div>
