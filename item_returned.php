@@ -1,5 +1,5 @@
 <?php
-include('includes/nav_bar.php'); // Include your navigation bar or any other necessary includes
+include('includes/nav_bar.php');
 session_start();
 
 $servername = "localhost";
@@ -26,12 +26,13 @@ function viewReturnedItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Serial Number</th><th>Returned By</th><th>Received By</th><th>Return Reason</th><th>Return Date</th></tr>";
+        echo "<tr><th>ID</th><th>Item Name</th><th>Serial Number</th><th>Returned By</th><th>Received By</th><th>Return Reason</th><th>Return Date</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
+            echo "<td>" . $row["item_name"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
             echo "<td>" . $row["returned_by"] . "</td>";
             echo "<td>" . $row["received_by"] . "</td>";

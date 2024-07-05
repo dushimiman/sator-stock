@@ -12,73 +12,93 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $serialNumber = $_POST['serial_number'];
+    $itemName = $_POST['item_name'];
+    $serialNumber = isset($_POST['serial_number']) ? $_POST['serial_number'] : null; 
     $returnedBy = $_POST['returned_by'];
     $receivedBy = $_SESSION['username'];
     $returnReason = $_POST['return_reason'];
     $isWorking = isset($_POST['is_working']) ? 1 : 0;
 
-    // Check if the serial number exists in out_in_stock table
-    $checkQuery = "SELECT * FROM out_in_stock WHERE serial_number = ?";
-    $stmtCheck = $conn->prepare($checkQuery);
-
-    if ($stmtCheck === false) {
-        die("Error preparing the query: " . $conn->error);
-    }
-
-    $stmtCheck->bind_param("s", $serialNumber);
-    $stmtCheck->execute();
-    $result = $stmtCheck->get_result();
-
-    if ($result->num_rows > 0) {
-        $item = $result->fetch_assoc();
-        $itemName = $item['item_name'];
-        $branch = $item['branch']; // Assuming branch information is available in out_in_stock table
-
-        // Insert the returned item into the returned_items table
-        $insertQuery = "INSERT INTO returned_items (serial_number, returned_by, received_by, return_reason, is_working) VALUES (?, ?, ?, ?, ?)";
+    if (empty($serialNumber)) {
+        
+        $insertQuery = "INSERT INTO returned_items (item_name, serial_number, returned_by, received_by, return_reason, is_working) VALUES (?, NULL, ?, ?, ?, ?)";
         $stmtInsert = $conn->prepare($insertQuery);
 
         if ($stmtInsert === false) {
             die("Error preparing the insert query: " . $conn->error);
         }
 
-        $stmtInsert->bind_param("ssssi", $serialNumber, $returnedBy, $receivedBy, $returnReason, $isWorking);
+        $stmtInsert->bind_param("ssssi", $itemName, $returnedBy, $receivedBy, $returnReason, $isWorking);
 
         if ($stmtInsert->execute()) {
-            // Delete the item from the out_in_stock table
-            $deleteQuery = "DELETE FROM out_in_stock WHERE serial_number = ?";
-            $stmtDelete = $conn->prepare($deleteQuery);
-
-            if ($stmtDelete === false) {
-                die("Error preparing the delete query: " . $conn->error);
-            }
-
-            $stmtDelete->bind_param("s", $serialNumber);
-            $stmtDelete->execute();
-
-            // Insert the returned item back into the stock table
-            $insertStockQuery = "INSERT INTO stock (item_name, serial_number, branch, creation_date, quantity, status) VALUES (?, ?, ?, NOW(), 1, ?)";
-            $status = $isWorking ? 'returned but working' : 'returned but not working';
-            $stmtInsertStock = $conn->prepare($insertStockQuery);
-
-            if ($stmtInsertStock === false) {
-                die("Error preparing the stock insert query: " . $conn->error);
-            }
-
-            $stmtInsertStock->bind_param("ssss", $itemName, $serialNumber, $branch, $status);
-            $stmtInsertStock->execute();
-
             echo "Item returned successfully.";
         } else {
             echo "Error returning item: " . $stmtInsert->error;
         }
     } else {
-        echo "Serial number not found in out_in_stock table.";
+       
+        $checkQuery = "SELECT * FROM out_in_stock WHERE serial_number = ?";
+        $stmtCheck = $conn->prepare($checkQuery);
+
+        if ($stmtCheck === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+
+        $stmtCheck->bind_param("s", $serialNumber);
+        $stmtCheck->execute();
+        $result = $stmtCheck->get_result();
+
+        if ($result->num_rows > 0) {
+            $item = $result->fetch_assoc();
+            $itemName = $item['item_name'];
+            $branch = $item['branch']; 
+
+        
+            $insertQuery = "INSERT INTO returned_items (item_name, serial_number, returned_by, received_by, return_reason, is_working) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmtInsert = $conn->prepare($insertQuery);
+
+            if ($stmtInsert === false) {
+                die("Error preparing the insert query: " . $conn->error);
+            }
+
+            $stmtInsert->bind_param("sssssi", $itemName, $serialNumber, $returnedBy, $receivedBy, $returnReason, $isWorking);
+
+            if ($stmtInsert->execute()) {
+               
+                $deleteQuery = "DELETE FROM out_in_stock WHERE serial_number = ?";
+                $stmtDelete = $conn->prepare($deleteQuery);
+
+                if ($stmtDelete === false) {
+                    die("Error preparing the delete query: " . $conn->error);
+                }
+
+                $stmtDelete->bind_param("s", $serialNumber);
+                $stmtDelete->execute();
+
+                
+                $insertStockQuery = "INSERT INTO stock (item_name, serial_number, branch, creation_date, quantity, status) VALUES (?, ?, ?, NOW(), 1, ?)";
+                $status = $isWorking ? 'returned but working' : 'returned but not working';
+                $stmtInsertStock = $conn->prepare($insertStockQuery);
+
+                if ($stmtInsertStock === false) {
+                    die("Error preparing the stock insert query: " . $conn->error);
+                }
+
+                $stmtInsertStock->bind_param("ssss", $itemName, $serialNumber, $branch, $status);
+                $stmtInsertStock->execute();
+
+                echo "Item returned successfully.";
+            } else {
+                echo "Error returning item: " . $stmtInsert->error;
+            }
+        } else {
+            echo "Serial number not found in out_in_stock table.";
+        }
     }
 }
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .card-body {
-            padding: 1.25rem; /* Adjust padding as needed */
+            padding: 1.25rem; 
         }
     </style>
 </head>
@@ -105,8 +125,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="card-body">
                         <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                             <div class="form-group">
+                                <label for="item_name">Item Name:</label>
+                                <input type="text" id="item_name" name="item_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
                                 <label for="serial_number">Serial Number:</label>
-                                <input type="text" id="serial_number" name="serial_number" class="form-control" required>
+                                <input type="text" id="serial_number" name="serial_number" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label for="returned_by">Returned By:</label>
@@ -133,7 +157,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

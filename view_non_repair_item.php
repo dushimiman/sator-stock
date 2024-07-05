@@ -13,13 +13,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-function getAllItems($conn, $search = '') {
-    $sql = "SELECT * FROM stock WHERE status = 'new item'";
+function viewReturnedItems($conn, $search = '') {
+    $sql = "SELECT * FROM returned_items WHERE is_working = 0";
     
     if (!empty($search)) {
-        $sql .= " AND (item_name LIKE '%$search%' OR item_type LIKE '%$search%' OR serial_number LIKE '%$search%' OR creation_date LIKE '%$search%')";
+        $sql .= " AND (serial_number LIKE '%$search%' OR returned_by LIKE '%$search%' OR received_by LIKE '%$search%' OR return_reason LIKE '%$search%' OR returned_date LIKE '%$search%')";
     }
     
     $result = $conn->query($sql);
@@ -28,24 +26,25 @@ function getAllItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Quantity</th><th>Creation Date</th><th>Status</th></tr>";
+        echo "<tr><th>ID</th><th>Item Name</th><th>Serial Number</th><th>Returned By</th><th>Received By</th><th>Return Reason</th><th>Return Date</th><th>Actions</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
             echo "<td>" . $row["item_name"] . "</td>";
-            echo "<td>" . $row["item_type"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
-            echo "<td>" . $row["quantity"] . "</td>";
-            echo "<td>" . $row["creation_date"] . "</td>";
-            echo "<td>" . $row["status"] . "</td>";
+            echo "<td>" . $row["returned_by"] . "</td>";
+            echo "<td>" . $row["received_by"] . "</td>";
+            echo "<td>" . $row["return_reason"] . "</td>";
+            echo "<td>" . $row["returned_date"] . "</td>";
+            echo "<td><a href='repair_item.php?id=" . $row["id"] . "' class='btn btn-warning'>Repair</a></td>";
             echo "</tr>";
         }
         echo "</tbody></table>";
         echo "</div>";
     } else {
-        echo "<p class='text-center'>No items found.</p>";
+        echo "<p class='text-center'>No returned items found.</p>";
     }
 }
 
@@ -62,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View All Items</title>
+    <title>View Returned Items</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -84,18 +83,18 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="text-center">View All New Items</h2>
+                        <h2 class="text-center">View Returned Items</h2>
                     </div>
                     <div class="card-body">
                         <?php
-                            getAllItems($conn, $search);
+                            viewReturnedItems($conn, $search);
                         ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-   
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

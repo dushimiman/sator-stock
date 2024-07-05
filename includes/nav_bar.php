@@ -9,7 +9,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
         }
         .navbar-brand img {
-            max-height: 50px; 
+            max-height: 70px; 
             margin-right: 10px; 
         }
         .navbar-nav {
@@ -28,7 +28,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
         <a class="navbar-brand" href="#">
-            <img src="./images/logo.png" alt="Logo"> 
+            <img src="./images/Capture.PNG" alt="Logo"> 
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -44,8 +44,10 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown1">
                         <a class="dropdown-item" href="add_item.php">Add Item</a>
-                        <a class="dropdown-item" href="view_all_item.php">All Item</a>
-                        <a class="dropdown-item" href="edited_items.php">View Edited Item</a>
+                        <a class="dropdown-item" href="view_all_item.php">New items</a>
+                        <a class="dropdown-item" href="returned_form.php">Return item</a>
+                        <a class="dropdown-item" href="view_repair_item.php">Repaired Item</a>
+                        <a class="dropdown-item" href="view_non_repair_item.php">Non_Repair Items</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -56,8 +58,8 @@
                         
                         <a class="dropdown-item" href="admin_request_list.php">Requests List</a>
                         <a class="dropdown-item" href="view_out_in_stock.php">View Out in stock</a>
-                        <a class="dropdown-item" href="returned_form.php">Return item</a>
-                        <a class="dropdown-item" href="item_returned.php">View item returned</a>
+                        
+                        
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -65,7 +67,7 @@
                        Report
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown3">
-                        <a class="dropdown-item" href="report_result.php">Stock Report</a>
+                        <a class="dropdown-item" href="report.php">Stock Report</a>
                     </div>
                 </li>
                 <li class="nav-item">

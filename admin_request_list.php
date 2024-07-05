@@ -2,7 +2,7 @@
 include('includes/nav_bar.php');
 include('includes/db.php');
 
-// Function to update status to Approved
+
 function approveRequest($conn, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
     if ($conn->query($sql) === true) {
@@ -18,6 +18,9 @@ $result = $conn->query($sql);
 if ($result === false) {
     die("Error executing the query: " . $conn->error);
 }
+if (!empty($search)) {
+    $sql .= " WHERE item_name LIKE '%$search%' OR item_type LIKE '%$search%' OR serial_number LIKE '%$search%' OR creation_date LIKE '%$search%'";
+}
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +32,7 @@ if ($result === false) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+
     
     <div class="container mt-4">
         
@@ -43,7 +47,7 @@ if ($result === false) {
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Status</th>
-                        <th>Actions</th> <!-- Added Actions column -->
+                        <th>Actions</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -59,7 +63,7 @@ if ($result === false) {
                             echo "<td>" . $row['status'] . "</td>";
                             echo "<td>";
                             echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a> ";
-                            echo "<a class='btn btn-warning btn-sm' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>"; // Out Item button
+                            echo "<a class='btn btn-warning btn-sm' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>"; 
                             echo "</td>";
                             echo "</tr>";
                         }
