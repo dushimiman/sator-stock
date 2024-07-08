@@ -1,5 +1,4 @@
 <?php
-include('includes/nav_bar.php');
 include('includes/db.php');
 
 if (isset($_GET['id'])) {
@@ -59,6 +58,18 @@ if (isset($_GET['id'])) {
                     <tr>
                         <th>Status:</th>
                         <td><?php echo $request['status']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Edit Quantity:</th>
+                        <td>
+                            <form action="edit_quantity.php" method="post">
+                                <input type="hidden" name="request_id" value="<?php echo $request['id']; ?>">
+                                <input type="number" name="new_quantity" value="<?php echo $request['quantity']; ?>" required>
+                                <label for="comment">Comment:</label>
+                                <textarea id="comment" name="comment" rows="2" cols="30"></textarea>
+                                <button type="submit" class="btn btn-sm btn-primary">Update Quantity</button>
+                            </form>
+                        </td>
                     </tr>
                 </tbody>
             </table>

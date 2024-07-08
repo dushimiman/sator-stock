@@ -129,7 +129,7 @@ $conn->close();
                                 <input type="text" id="item_name" name="item_name" class="form-control" required>
                             </div>
                             <div class="form-group">
-                                <label for="serial_number">Serial Number:</label>
+                                <label for="serial_number">S/N:</label>
                                 <input type="text" id="serial_number" name="serial_number" class="form-control">
                             </div>
                             <div class="form-group">

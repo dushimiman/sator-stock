@@ -2,7 +2,6 @@
 include('includes/user_nav_bar.php');
 include('includes/db.php');
 
-
 function approveRequest($conn, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
     if ($conn->query($sql) === true) {
@@ -12,8 +11,10 @@ function approveRequest($conn, $request_id) {
     }
 }
 
-
-$sql = "SELECT * FROM requests";
+$sql = "SELECT *, qc.comment AS change_comment
+        FROM requests r
+        LEFT JOIN quantity_change_log qc ON r.id = qc.request_id
+        ORDER BY r.requisition_date DESC";
 $result = $conn->query($sql);
 
 if ($result === false) {
@@ -44,7 +45,7 @@ if ($result === false) {
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Status</th>
-                        
+                        <th>Change Comment</th> <!-- New column for change comment -->
                     </tr>
                 </thead>
                 <tbody>
@@ -57,13 +58,12 @@ if ($result === false) {
                             echo "<td>" . $row['requested_by'] . "</td>";
                             echo "<td>" . $row['item_name'] . "</td>";
                             echo "<td>" . $row['quantity'] . "</td>";
-                           
                             echo "<td>" . $row['status'] . "</td>";
-                            
+                            echo "<td>" . ($row['change_comment'] ?? '') . "</td>"; // Display change comment if available
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' class='text-center'>No requests found</td></tr>";
+                        echo "<tr><td colspan='7' class='text-center'>No requests found</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -80,3 +80,4 @@ if ($result === false) {
 <?php
 $conn->close();
 ?>
+

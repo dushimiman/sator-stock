@@ -6,11 +6,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item_name = $_POST['item'];
     $item_type = $_POST['type'];
     $serial_number = isset($_POST['serial_number']) ? $_POST['serial_number'] : null;
+    $imei = isset($_POST['imei']) ? $_POST['imei'] : null;
     $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : null;
     $branch = 'HQS'; 
     $creation_date = date("Y-m-d H:i:s");
 
-  
     if (!empty($serial_number)) {
         $quantity = 1;
     } else {
@@ -18,12 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
    
-    $stmt = $conn->prepare("INSERT INTO stock (item_name, item_type, serial_number, branch, creation_date, quantity) VALUES (?, ?, ?, ?, ?, ?)");
+    $query = "INSERT INTO stock (item_name, item_type, serial_number, imei, branch, creation_date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    
+    $stmt = $conn->prepare($query);
     if ($stmt === false) {
         die('Prepare failed: ' . htmlspecialchars($conn->error));
     }
 
-    $bind = $stmt->bind_param("sssssi", $item_name, $item_type, $serial_number, $branch, $creation_date, $quantity);
+    $bind = $stmt->bind_param("ssssssi", $item_name, $item_type, $serial_number, $imei, $branch, $creation_date, $quantity);
     if ($bind === false) {
         die('Bind param failed: ' . htmlspecialchars($stmt->error));
     }
@@ -40,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -60,7 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
     <script>
         const itemTypes = {
             'SPEED GOVERNORS': ['SPG 001', 'Only SPG 001 Without Antenna', 'Only SPG 001 Without Display', 'Only SPG 001 Without Antenna and Display', 'R0SCO', 'R0SCO Not Working', 'SG 001 Not Working'],
@@ -80,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const itemSelect = document.getElementById("item");
             const typeSelect = document.getElementById("type");
             const serialNumberField = document.getElementById("serial_number_field");
+            const imeiField = document.getElementById("imei_field");
             const quantityField = document.getElementById("quantity_field");
             const selectedItem = itemSelect.value;
 
@@ -96,9 +99,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const requiresSerialNumber = ["GPS TRACKERS", "SPEED GOVERNORS"];
             if (requiresSerialNumber.includes(selectedItem)) {
                 serialNumberField.style.display = "block";
+                imeiField.style.display = "block";
                 quantityField.style.display = "none";
             } else {
                 serialNumberField.style.display = "none";
+                imeiField.style.display = "none";
                 quantityField.style.display = "block";
             }
         }
@@ -108,19 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const itemType = itemSelect.value;
             const serialNumber = document.getElementById("serial_number").value;
 
-            if (itemType === "GPS TRACKERS") {
-                const gpsPattern = /^[A-Z]{2}[0-9]{15}$/;
-                if (!gpsPattern.test(serialNumber)) {
-                    alert("GPS TRACKERS serial number must be 2 characters, 15 numbers");
-                    return false;
-                }
-            } else if (itemType === "SPEED GOVERNORS") {
-                const spgPattern = /^[A-Z]{2}[0-9]{11}$/;
-                if (!spgPattern.test(serialNumber)) {
-                    alert("SPEED GOVERNORS serial number must be 2 characters, 11 numbers.");
-                    return false;
-                }
-            }
+           
 
             return true;
         }
@@ -156,8 +149,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <select id="type" name="type" class="form-control"></select>
                 </div>
                 <div id="serial_number_field" class="form-group" style="display: none;">
-                    <label for="serial_number">Serial Number:</label>
+                    <label for="serial_number">S/N:</label>
                     <input type="text" id="serial_number" name="serial_number" class="form-control">
+                </div>
+                <div id="imei_field" class="form-group" style="display: none;">
+                    <label for="imei">IMEI:</label>
+                    <input type="text" id="imei" name="imei" class="form-control">
                 </div>
                 <div id="quantity_field" class="form-group" style="display: none;">
                     <label for="quantity">Quantity:</label>

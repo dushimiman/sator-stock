@@ -28,7 +28,7 @@ function getAllItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>Quantity</th><th>Creation Date</th><th>Status</th></tr>";
+        echo "<tr><th>ID</th><th>Name</th><th>Type</th><th>Serial Number</th><th>IMEI</th><th>Quantity</th><th>Creation Date</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
@@ -37,9 +37,10 @@ function getAllItems($conn, $search = '') {
             echo "<td>" . $row["item_name"] . "</td>";
             echo "<td>" . $row["item_type"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
+            echo "<td>" . $row["imei"] . "</td>";
             echo "<td>" . $row["quantity"] . "</td>";
             echo "<td>" . $row["creation_date"] . "</td>";
-            echo "<td>" . $row["status"] . "</td>";
+          
             echo "</tr>";
         }
         echo "</tbody></table>";

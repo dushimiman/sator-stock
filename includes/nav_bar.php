@@ -46,7 +46,7 @@
                         <a class="dropdown-item" href="add_item.php">Add Item</a>
                         <a class="dropdown-item" href="view_all_item.php">New items</a>
                         <a class="dropdown-item" href="returned_form.php">Return item</a>
-                        <a class="dropdown-item" href="view_repair_item.php">Repaired Item</a>
+                        <a class="dropdown-item" href="view_repair_item.php">Repaired Items</a>
                         <a class="dropdown-item" href="view_non_repair_item.php">Non_Repair Items</a>
                     </div>
                 </li>
