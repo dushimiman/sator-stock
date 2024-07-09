@@ -11,13 +11,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $branch = 'HQS'; 
     $creation_date = date("Y-m-d H:i:s");
 
+    // Validation for SPEED GOVERNORS
+    if ($item_name == "SPEED GOVERNORS") {
+        if ($item_type == "SPG 001") {
+            if (!empty($serial_number) && !preg_match('/^[A-Za-z]{2}\d{12}$/', $serial_number)) {
+                die('Serial number for SPG 001 must be 2 letters followed by 12 numbers.');
+            }
+        } else {
+            if (!empty($serial_number) && !preg_match('/^\d{15}$/', $serial_number)) {
+                die('Serial number for other SPEED GOVERNORS must be exactly 15 numbers.');
+            }
+        }
+    }
+
+    // Validation for GPS TRACKERS
+    if ($item_name == "GPS TRACKERS") {
+        if (!empty($serial_number) && !preg_match('/^\d{6}$/', $serial_number)) {
+            die('Serial number must be exactly 6 numbers.');
+        }
+        if (empty($imei) || !preg_match('/^\d{15}$/', $imei)) {
+            die('IMEI is required and must be exactly 15 numbers.');
+        }
+    }
+
     if (!empty($serial_number)) {
         $quantity = 1;
     } else {
         $serial_number = null; 
     }
 
-   
     $query = "INSERT INTO stock (item_name, item_type, serial_number, imei, branch, creation_date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($query);
@@ -30,13 +52,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die('Bind param failed: ' . htmlspecialchars($stmt->error));
     }
 
-    // Execute and check for errors
     $execute = $stmt->execute();
     if ($execute === false) {
         die('Execute failed: ' . htmlspecialchars($stmt->error));
     }
 
-    echo "New item added successfully";
+    
+    header("Location: view_all_item.php");
+    exit;
 
     $stmt->close();
     $conn->close();
@@ -96,10 +119,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             }
 
-            const requiresSerialNumber = ["GPS TRACKERS", "SPEED GOVERNORS"];
-            if (requiresSerialNumber.includes(selectedItem)) {
+            if (selectedItem === "GPS TRACKERS" || selectedItem === "SPEED GOVERNORS") {
                 serialNumberField.style.display = "block";
-                imeiField.style.display = "block";
+                imeiField.style.display = selectedItem === "GPS TRACKERS" ? "block" : "none";
                 quantityField.style.display = "none";
             } else {
                 serialNumberField.style.display = "none";
@@ -112,8 +134,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const itemSelect = document.getElementById("item");
             const itemType = itemSelect.value;
             const serialNumber = document.getElementById("serial_number").value;
+            const imei = document.getElementById("imei").value;
+            const itemTypeSelected = document.getElementById("type").value;
 
-           
+            if (itemType === "SPEED GOVERNORS") {
+                if (itemTypeSelected === "SPG 001" && serialNumber && !/^[A-Za-z]{2}\d{12}$/.test(serialNumber)) {
+                    alert('Serial number for SPG 001 must be 2 letters followed by 12 numbers.');
+                    return false;
+                } else if (itemTypeSelected !== "SPG 001" && serialNumber && !/^\d{15}$/.test(serialNumber)) {
+                    alert('Serial number for other SPEED GOVERNORS must be exactly 15 numbers.');
+                    return false;
+                }
+            }
+
+            if (itemType === "GPS TRACKERS") {
+                if (serialNumber && !/^\d{6}$/.test(serialNumber)) {
+                    alert('Serial number must be exactly 6 numbers.');
+                    return false;
+                }
+                if (!imei || !/^\d{15}$/.test(imei)) {
+                    alert('IMEI is required and must be exactly 15 numbers.');
+                    return false;
+                }
+            }
 
             return true;
         }
@@ -144,22 +187,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="ENVELOPPE">ENVELOPPE</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="type">Item Type:</label>
+                    <label for="type">Type:</label>
                     <select id="type" name="type" class="form-control"></select>
                 </div>
-                <div id="serial_number_field" class="form-group" style="display: none;">
-                    <label for="serial_number">S/N:</label>
+
+                <div class="form-group" id="serial_number_field">
+                    <label for="serial_number">Serial Number:</label>
                     <input type="text" id="serial_number" name="serial_number" class="form-control">
                 </div>
-                <div id="imei_field" class="form-group" style="display: none;">
+
+                <div class="form-group" id="imei_field">
                     <label for="imei">IMEI:</label>
                     <input type="text" id="imei" name="imei" class="form-control">
                 </div>
-                <div id="quantity_field" class="form-group" style="display: none;">
+
+                <div class="form-group" id="quantity_field">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" class="form-control">
                 </div>
+
                 <button type="submit" class="btn btn-primary btn-block">Add Item</button>
             </form>
         </div>
