@@ -1,73 +1,74 @@
 <?php
+// Include the navigation bar
 include('includes/nav_bar.php');
+
+// Database credentials
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "stock_management_system";
 
+// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM out_in_stock";
+// Fetch records from the out_in_stock table
+$sql = "SELECT * FROM out_in_stock ORDER BY created_at DESC";
 $result = $conn->query($sql);
 
-if ($result === false) {
-    die("Error executing the query: " . $conn->error);
-}
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Items Out in Stock</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>View Out in Stock Items</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center mb-4">Items Out in Stock</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Item Name</th>
-                        <th>Serial Number</th>
-                        <th>Quantity</th>
-                        <th>Out Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<tr>";
-                            echo "<td>" . $row['id'] . "</td>";
-                            echo "<td>" . $row['item_name'] . "</td>";
-                            echo "<td>" . $row['serial_number'] . "</td>";
-                            echo "<td>" . $row['quantity'] . "</td>";
-                            echo "<td>" . $row['out_date'] . "</td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='5' class='text-center'>No items found</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <h2>View Out in Stock Items</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Item Name</th>
+            <th>IMEI</th>
+            <th>Serial Number</th>
+            <th>Quantity</th>
+            <th>Date Out</th>
+        </tr>
+        <?php
+        if ($result->num_rows > 0) {
+        
+            while($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row["id"] . "</td>";
+                echo "<td>" . $row["item_name"] . "</td>";
+                echo "<td>" . $row["imei"] . "</td>";
+                echo "<td>" . $row["serial_number"] . "</td>";
+                echo "<td>" . $row["quantity"] . "</td>";
+                echo "<td>" . $row["created_at"] . "</td>";
+                echo "</tr>";
+            }
+        } else {
+            echo "<tr><td colspan='5'>No records found</td></tr>";
+        }
+        $conn->close();
+        ?>
+    </table>
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

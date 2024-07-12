@@ -1,6 +1,4 @@
-<?php
-include('includes/user_nav_bar.php');
-?>
+<?php include('includes/user_nav_bar.php'); ?>
 
 <!DOCTYPE html>
 <html>
@@ -26,7 +24,26 @@ include('includes/user_nav_bar.php');
 
             <div class="form-group">
                 <label for="item_name">Item Name:</label>
-                <input type="text" id="item_name" name="item_name" class="form-control" required>
+                <select id="item_name" name="item_name" class="form-control" onchange="showOtherItemInput()" required>
+                    <option value="">Select Item Name</option>
+                    <option value="SPEED GOVERNORS">SPEED GOVERNORS</option>
+                    <option value="GPS TRACKERS">GPS TRACKERS</option>
+                    <option value="FUEL LEVER SENSOR">FUEL LEVER SENSOR</option>
+                    <option value="X-1R Product">X-1R Product</option>
+                    <option value="SENSOR FOR ROSCO">SENSOR FOR ROSCO</option>
+                    <option value="CERTIFICATE PAPER">CERTIFICATE PAPER</option>
+                    <option value="CABLE FOR ROSCO">CABLE FOR ROSCO</option>
+                    <option value="Note Book">Note Book</option>
+                    <option value="Remote">Remote</option>
+                    <option value="SIMCARD">SIMCARD</option>
+                    <option value="ENVELOPPE">ENVELOPPE</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="other_item_container" style="display: none;">
+                <label for="other_item">Other Item:</label>
+                <input type="text" id="other_item" name="other_item" class="form-control">
             </div>
 
             <div class="form-group">
@@ -52,6 +69,15 @@ include('includes/user_nav_bar.php');
             <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>
     </div>
+
+    <script>
+        function showOtherItemInput() {
+            const itemName = document.getElementById('item_name').value;
+            const otherItemContainer = document.getElementById('other_item_container');
+
+            otherItemContainer.style.display = itemName === 'Other' ? 'block' : 'none';
+        }
+    </script>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

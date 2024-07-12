@@ -2,7 +2,6 @@
 
 include('includes/db.php'); 
 
-
 function approveRequest($conn, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
     if ($conn->query($sql) === true) {
@@ -12,11 +11,9 @@ function approveRequest($conn, $request_id) {
     }
 }
 
-
 if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id'])) {
     $request_id = $_GET['id'];
     if (approveRequest($conn, $request_id)) {
-        
         header("Location: request_list.php");
         exit();
     } else {
@@ -24,8 +21,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id']
     }
 }
 
+$searchTerm = '';
+if (isset($_GET['search'])) {
+    $searchTerm = $conn->real_escape_string($_GET['search']);
+    $sql = "SELECT * FROM requests WHERE requested_by LIKE '%$searchTerm%' OR item_name LIKE '%$searchTerm%'";
+} else {
+    $sql = "SELECT * FROM requests";
+}
 
-$sql = "SELECT * FROM requests";
 $result = $conn->query($sql);
 
 if ($result === false) {
@@ -44,6 +47,10 @@ if ($result === false) {
 <body>
     <div class="container mt-4">
         <h2 class="text-center mb-4">All Requests</h2>
+        <form class="form-inline mb-4" method="GET" action="">
+            <input class="form-control mr-sm-2" type="search" name="search" placeholder="Search" aria-label="Search" value="<?php echo htmlspecialchars($searchTerm); ?>">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
@@ -67,7 +74,6 @@ if ($result === false) {
                             echo "<td>" . $row['requested_by'] . "</td>";
                             echo "<td>" . $row['item_name'] . "</td>";
                             echo "<td>" . $row['quantity'] . "</td>";
-                           
                             echo "<td>" . $row['status'] . "</td>";
                             echo "<td>";
                             if ($row['status'] == 'pending') {

@@ -1,4 +1,6 @@
 <?php
+include('includes/nav_bar.php');
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -14,133 +16,151 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $request_id = $_POST['request_id'];
     $item_name = $_POST['item_name'];
 
-    // Fetch requested quantity from the requests table
-    $sql_request = "SELECT quantity FROM requests WHERE id = ?";
-    $stmt_request = $conn->prepare($sql_request);
-    if (!$stmt_request) {
-        die("Error preparing the query: " . $conn->error);
-    }
-    $stmt_request->bind_param("i", $request_id);
-    $stmt_request->execute();
-    $stmt_request->bind_result($requested_quantity);
-    $stmt_request->fetch();
-    $stmt_request->close();
-
-    if ($item_name === 'SPEED GOVERNORS' || $item_name === 'GPS TRACKERS') {
-        // Check if serial numbers were provided
-        if (isset($_POST['serial_numbers']) && !empty($_POST['serial_numbers'])) {
-            $serial_numbers = explode(",", $_POST['serial_numbers']);
-        } else {
-            die("Serial numbers are required for SPEED GOVERNORS and GPS TRACKERS.");
-        }
-
-        // Check total quantity of serial numbers in stock
-        $serial_count = count($serial_numbers);
-        if ($serial_count < $requested_quantity) {
-            die("The number of serial numbers provided does not match the requested quantity.");
-        }
-
-        $placeholders = implode(',', array_fill(0, $serial_count, '?'));
-        $types = str_repeat('s', $serial_count);
-        $sql_stock_serials = "SELECT COUNT(*) FROM stock WHERE item_name = ? AND serial_number IN ($placeholders)";
-        $stmt_stock_serials = $conn->prepare($sql_stock_serials);
-        if (!$stmt_stock_serials) {
+    if ($item_name === 'GPS TRACKERS') {
+        $imei = $_POST['imei'];
+        
+        // Check if the IMEI exists in stock for GPS TRACKERS
+        $check_sql = "SELECT * FROM stock WHERE item_name = ? AND serial_number = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        
+        if ($check_stmt === false) {
             die("Error preparing the query: " . $conn->error);
         }
-        $stmt_stock_serials->bind_param("s" . $types, $item_name, ...$serial_numbers);
-        $stmt_stock_serials->execute();
-        $stmt_stock_serials->bind_result($serials_in_stock);
-        $stmt_stock_serials->fetch();
-        $stmt_stock_serials->close();
-
-        if ($serials_in_stock >= $requested_quantity) {
-            // Delete items from stock table and insert into out_in_stock table
-            foreach ($serial_numbers as $serial_number) {
-                // Delete from stock table
-                $sql_delete_stock = "DELETE FROM stock WHERE item_name = ? AND serial_number = ?";
-                $stmt_delete_stock = $conn->prepare($sql_delete_stock);
-                if (!$stmt_delete_stock) {
-                    die("Error preparing the query: " . $conn->error);
-                }
-                $stmt_delete_stock->bind_param("ss", $item_name, $serial_number);
-                $stmt_delete_stock->execute();
-                $stmt_delete_stock->close();
-
-                // Insert into out_in_stock table
-                $sql_insert_out_stock = "INSERT INTO out_in_stock (item_name, serial_number, quantity) VALUES (?, ?, 1)";
-                $stmt_insert_out_stock = $conn->prepare($sql_insert_out_stock);
-                if (!$stmt_insert_out_stock) {
-                    die("Error preparing the query: " . $conn->error);
-                }
-                $stmt_insert_out_stock->bind_param("ss", $item_name, $serial_number);
-                $stmt_insert_out_stock->execute();
-                $stmt_insert_out_stock->close();
-            }
-
-            // Mark request as processed
-            $sql_update_request = "UPDATE requests SET status = 'processed' WHERE id = ?";
-            $stmt_update_request = $conn->prepare($sql_update_request);
-            if (!$stmt_update_request) {
-                die("Error preparing the query: " . $conn->error);
-            }
-            $stmt_update_request->bind_param("i", $request_id);
-            $stmt_update_request->execute();
-            $stmt_update_request->close();
-
-            echo "Item successfully taken out from stock.";
-        } else {
-            echo "Insufficient stock.";
+        
+        $check_stmt->bind_param("ss", $item_name, $imei);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+        
+        if ($check_result->num_rows == 0) {
+            die("IMEI $imei is not available in stock for GPS TRACKERS.");
         }
+        
+        // Insert into out_in_stock table
+        $insert_sql = "INSERT INTO out_in_stock (id, item_name, imei) VALUES (?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        
+        if ($insert_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $insert_stmt->bind_param("iss", $request_id, $item_name, $imei);
+        $insert_stmt->execute();
+        
+        $insert_stmt->close();
+        
+        // Delete from stock table (assuming you want to remove this specific IMEI)
+        $delete_sql = "DELETE FROM stock WHERE item_name = ? AND serial_number = ?";
+        $delete_stmt = $conn->prepare($delete_sql);
+        
+        if ($delete_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $delete_stmt->bind_param("ss", $item_name, $imei);
+        $delete_stmt->execute();
+        
+        $delete_stmt->close();
+        
+    } elseif ($item_name === 'SPEED GOVERNORS') {
+        $serial_number = $_POST['serial_number'];
+        
+        // Check if the serial number exists in stock for SPEED GOVERNORS
+        $check_sql = "SELECT * FROM stock WHERE item_name = ? AND serial_number = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        
+        if ($check_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $check_stmt->bind_param("ss", $item_name, $serial_number);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+        
+        if ($check_result->num_rows == 0) {
+            die("Serial number $serial_number is not available in stock for SPEED GOVERNORS.");
+        }
+        
+        // Insert into out_in_stock table
+        $insert_sql = "INSERT INTO out_in_stock (id, item_name, serial_number) VALUES (?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        
+        if ($insert_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $insert_stmt->bind_param("iss", $request_id, $item_name, $serial_number);
+        $insert_stmt->execute();
+        
+        $insert_stmt->close();
+        
+        // Delete from stock table (assuming you want to remove this specific serial number)
+        $delete_sql = "DELETE FROM stock WHERE item_name = ? AND serial_number = ?";
+        $delete_stmt = $conn->prepare($delete_sql);
+        
+        if ($delete_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $delete_stmt->bind_param("ss", $item_name, $serial_number);
+        $delete_stmt->execute();
+        
+        $delete_stmt->close();
+        
     } else {
-        // Fetch stock quantity for items without serial numbers
-        $sql_stock = "SELECT quantity FROM stock WHERE item_name = ?";
-        $stmt_stock = $conn->prepare($sql_stock);
-        if (!$stmt_stock) {
+        // Handle other items (Quantity input)
+        $quantity = $_POST['quantity'];
+        
+        // Check if requested quantity is available in stock
+        $check_sql = "SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        
+        if ($check_stmt === false) {
             die("Error preparing the query: " . $conn->error);
         }
-        $stmt_stock->bind_param("s", $item_name);
-        $stmt_stock->execute();
-        $stmt_stock->bind_result($stock_quantity);
-        $stmt_stock->fetch();
-        $stmt_stock->close();
-
-        if ($stock_quantity >= $requested_quantity) {
-            // Update stock quantity
-            $new_stock_quantity = $stock_quantity - $requested_quantity;
-            $sql_update_stock = "UPDATE stock SET quantity = ? WHERE item_name = ?";
-            $stmt_update_stock = $conn->prepare($sql_update_stock);
-            if (!$stmt_update_stock) {
-                die("Error preparing the query: " . $conn->error);
-            }
-            $stmt_update_stock->bind_param("is", $new_stock_quantity, $item_name);
-            $stmt_update_stock->execute();
-            $stmt_update_stock->close();
-
-            // Insert into out_in_stock table
-            $sql_insert_out_stock = "INSERT INTO out_in_stock (item_name, quantity) VALUES (?, ?)";
-            $stmt_insert_out_stock = $conn->prepare($sql_insert_out_stock);
-            if (!$stmt_insert_out_stock) {
-                die("Error preparing the query: " . $conn->error);
-            }
-            $stmt_insert_out_stock->bind_param("si", $item_name, $requested_quantity);
-            $stmt_insert_out_stock->execute();
-            $stmt_insert_out_stock->close();
-
-            // Mark request as processed
-            $sql_update_request = "UPDATE requests SET status = 'processed' WHERE id = ?";
-            $stmt_update_request = $conn->prepare($sql_update_request);
-            if (!$stmt_update_request) {
-                die("Error preparing the query: " . $conn->error);
-            }
-            $stmt_update_request->bind_param("i", $request_id);
-            $stmt_update_request->execute();
-            $stmt_update_request->close();
-
-            echo "Item successfully taken out from stock.";
-        } else {
-            echo "Insufficient stock.";
+        
+        $check_stmt->bind_param("s", $item_name);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+        $row = $check_result->fetch_assoc();
+        $total_quantity = $row['total_quantity'];
+        
+        if ($total_quantity < $quantity) {
+            die("Requested quantity ($quantity) exceeds available stock ($total_quantity) for $item_name.");
         }
+        
+        // Insert into out_in_stock table
+        $insert_sql = "INSERT INTO out_in_stock (id, item_name, quantity) VALUES (?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        
+        if ($insert_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $insert_stmt->bind_param("isi", $request_id, $item_name, $quantity);
+        $insert_stmt->execute();
+        
+        $insert_stmt->close();
+        
+        // Update stock quantity (subtract requested quantity)
+        $update_sql = "UPDATE stock SET quantity = quantity - ? WHERE item_name = ? LIMIT ?";
+        $update_stmt = $conn->prepare($update_sql);
+        
+        if ($update_stmt === false) {
+            die("Error preparing the query: " . $conn->error);
+        }
+        
+        $update_stmt->bind_param("isi", $quantity, $item_name, $quantity);
+        $update_stmt->execute();
+        
+        $update_stmt->close();
     }
+    
+    // Redirect to view_out_in_stock.php after successful processing
+    header("Location: view_out_in_stock.php");
+    exit();
+    
+} else {
+    die("Invalid request method.");
 }
 
 $conn->close();

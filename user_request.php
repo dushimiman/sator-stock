@@ -39,13 +39,13 @@ if ($result === false) {
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
                     <tr>
-                        <th>ID</th>
+                       
                         <th>Requisition Date</th>
                         <th>Requested By</th>
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Status</th>
-                        <th>Change Comment</th> <!-- New column for change comment -->
+                        <th>Change Comment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,13 +53,13 @@ if ($result === false) {
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
                             echo "<tr>";
-                            echo "<td>" . $row['id'] . "</td>";
+                            
                             echo "<td>" . $row['requisition_date'] . "</td>";
                             echo "<td>" . $row['requested_by'] . "</td>";
                             echo "<td>" . $row['item_name'] . "</td>";
                             echo "<td>" . $row['quantity'] . "</td>";
                             echo "<td>" . $row['status'] . "</td>";
-                            echo "<td>" . ($row['change_comment'] ?? '') . "</td>"; // Display change comment if available
+                            echo "<td>" . ($row['change_comment'] ?? '') . "</td>"; 
                             echo "</tr>";
                         }
                     } else {

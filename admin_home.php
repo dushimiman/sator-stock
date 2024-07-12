@@ -16,22 +16,22 @@ try {
     $pdo = new PDO('mysql:host=localhost;dbname=stock_management_system', 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Query to count occurrences of each item and filter those with quantity < 5
-    $stmt = $pdo->prepare("SELECT item_name, SUM(quantity) AS total_quantity FROM stock GROUP BY item_name HAVING SUM(quantity) < 5");
+    
+    $stmt = $pdo->prepare("SELECT item_type, SUM(quantity) AS total_quantity FROM stock GROUP BY item_type HAVING SUM(quantity) < 5");
     $stmt->execute();
-    $low_stock_items = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
+    $low_stock_items = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 } catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
 }
 
-$sql = "SELECT item_name, COUNT(*) as count FROM stock GROUP BY item_name";
+$sql = "SELECT item_type, COUNT(*) as count FROM stock GROUP BY item_type";
 $result = $conn->query($sql);
 
 $dataPoints = array();
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $dataPoint = array("label" => $row['item_name'], "y" => $row['count']);
+        $dataPoint = array("label" => $row['item_type'], "y" => $row['count']);
         array_push($dataPoints, $dataPoint);
     }
 }
@@ -55,14 +55,14 @@ $conn->close();
             padding: 20px;
         }
         #itemChartContainer {
-            max-width: 800px; /* Set a maximum width for the chart container */
+            max-width: 800px; 
             margin: 0 auto;
         }
         .modal-notification {
             position: fixed;
-            top: 70px; /* Adjust as per your navbar height */
+            top: 70px; 
             right: 20px;
-            z-index: 1050; /* Ensure it's above the modal backdrop (1040) */
+            z-index: 1050; 
         }
     </style>
 </head>
@@ -77,7 +77,7 @@ $conn->close();
             </div>
         </div>
 
-        <!-- Notification Modal -->
+       
         <div class="modal fade modal-notification" id="lowStockModal" tabindex="-1" role="dialog" aria-labelledby="lowStockModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -92,7 +92,7 @@ $conn->close();
                             <p>Some items have low quantities in stock:</p>
                             <ul>
                                 <?php foreach ($low_stock_items as $item): ?>
-                                    <li><?php echo htmlspecialchars($item['item_name']) . ' (Total Quantity: ' . htmlspecialchars($item['total_quantity']) . ')'; ?></li>
+                                    <li><?php echo htmlspecialchars($item['item_type']) . ' (Total Quantity: ' . htmlspecialchars($item['total_quantity']) . ')'; ?></li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php else: ?>

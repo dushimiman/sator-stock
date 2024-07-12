@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $branch = 'HQS'; 
     $creation_date = date("Y-m-d H:i:s");
 
-    // Validation for SPEED GOVERNORS
+   
     if ($item_name == "SPEED GOVERNORS") {
         if ($item_type == "SPG 001") {
             if (!empty($serial_number) && !preg_match('/^[A-Za-z]{2}\d{12}$/', $serial_number)) {
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Validation for GPS TRACKERS
+    
     if ($item_name == "GPS TRACKERS") {
         if (!empty($serial_number) && !preg_match('/^\d{6}$/', $serial_number)) {
             die('Serial number must be exactly 6 numbers.');

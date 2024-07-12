@@ -27,10 +27,7 @@ if (isset($_GET['id'])) {
                         <th style="width: 30%;">Requisition Date:</th>
                         <td><?php echo $request['requisition_date']; ?></td>
                     </tr>
-                    <tr>
-                        <th>Requisition Number:</th>
-                        <td><?php echo $request['requisition_number']; ?></td>
-                    </tr>
+                    
                     <tr>
                         <th>Requested By:</th>
                         <td><?php echo $request['requested_by']; ?></td>
@@ -44,7 +41,7 @@ if (isset($_GET['id'])) {
                         <td><?php echo $request['quantity']; ?></td>
                     </tr>
                     <tr>
-                        <th>Location for Item:</th>
+                        <th>Location </th>
                         <td><?php echo $request['location']; ?></td>
                     </tr>
                     <tr>
