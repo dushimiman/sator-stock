@@ -1,16 +1,58 @@
 <?php
+include('includes/db.php');
 
-include('includes/db.php'); 
-
-function approveRequest($conn, $request_id) {
-    $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
-    if ($conn->query($sql) === true) {
-        return true;
-    } else {
-        return false;
+function checkItemAvailability($conn, $item_name, $requested_quantity) {
+    // Check in stock table
+    $stmt = $conn->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
+    if (!$stmt) {
+        die("Error preparing stock query: " . $conn->error);
     }
+    $stmt->bind_param("s", $item_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $total_quantity = 0;
+    if ($result->num_rows == 1) {
+        $stock = $result->fetch_assoc();
+        $total_quantity += $stock['total_quantity'];
+    }
+
+    return $total_quantity >= $requested_quantity;
 }
 
+function approveRequest($conn, $request_id) {
+    $stmt = $conn->prepare("SELECT * FROM requests WHERE id = ?");
+    $stmt->bind_param("i", $request_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 1) {
+        $request = $result->fetch_assoc();
+        $item_name = $request['item_name'];
+        $requested_quantity = $request['quantity'];
+
+        if (checkItemAvailability($conn, $item_name, $requested_quantity)) {
+            // Update request status to 'approved'
+            $stmt = $conn->prepare("UPDATE requests SET status = 'approved' WHERE id = ?");
+            $stmt->bind_param("i", $request_id);
+
+            if ($stmt->execute()) {
+                echo "Request approved successfully for item '$item_name'.";
+                return true;
+            } else {
+                echo "Error updating request status: " . $conn->error;
+            }
+        } else {
+            echo "Error: Requested quantity ($requested_quantity) exceeds available stock for item '$item_name'.";
+        }
+    } else {
+        echo "Error: Request not found or multiple requests found.";
+    }
+
+    return false;
+}
+
+// Approve request action
 if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id'])) {
     $request_id = $_GET['id'];
     if (approveRequest($conn, $request_id)) {
@@ -21,6 +63,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id']
     }
 }
 
+// Fetch requests list
 $searchTerm = '';
 if (isset($_GET['search'])) {
     $searchTerm = $conn->real_escape_string($_GET['search']);
@@ -77,14 +120,14 @@ if ($result === false) {
                             echo "<td>" . $row['status'] . "</td>";
                             echo "<td>";
                             if ($row['status'] == 'pending') {
-                                echo "<a class='btn btn-success btn-sm' href='request_list.php?action=Approve&id=" . $row['id'] . "'>Approve</a> ";
+                                echo "<a class='btn btn-success btn-sm' href='?action=Approve&id=" . $row['id'] . "'>Approve</a> ";
                             }
                             echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
                             echo "</td>";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' class='text-center'>No requests found</td></tr>";
+                        echo "<tr><td colspan='7' class='text-center'>No requests found</td></tr>";
                     }
                     ?>
                 </tbody>

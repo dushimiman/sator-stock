@@ -16,7 +16,14 @@ if ($conn->connect_error) {
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 function getAllItems($conn, $search = '') {
-    $sql = "SELECT * FROM stock WHERE status = 'new item'";
+    $sql = "
+        SELECT id, item_name, item_type, serial_number, imei, quantity, creation_date
+        FROM stock
+        WHERE status = 'new item'
+        UNION
+        SELECT id, item_name, item_type, serial_number, imei, quantity, creation_date
+        FROM returned_items
+        WHERE is_working = 1";
     
     if (!empty($search)) {
         $sql .= " AND (item_name LIKE '%$search%' OR item_type LIKE '%$search%' OR serial_number LIKE '%$search%' OR creation_date LIKE '%$search%')";
@@ -40,7 +47,6 @@ function getAllItems($conn, $search = '') {
             echo "<td>" . $row["imei"] . "</td>";
             echo "<td>" . $row["quantity"] . "</td>";
             echo "<td>" . $row["creation_date"] . "</td>";
-          
             echo "</tr>";
         }
         echo "</tbody></table>";
@@ -85,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="text-center">View All New Items</h2>
+                        <h4 class="text-center">View All New Items</h4>
                     </div>
                     <div class="card-body">
                         <?php
