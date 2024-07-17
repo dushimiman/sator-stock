@@ -1,5 +1,5 @@
 <?php
-require('fpdf/fpdf.php');
+require_once('TCPDF-main/tcpdf.php');
 
 $servername = "localhost";
 $username = "root";
@@ -12,133 +12,141 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-function generateReport($conn, $startDate, $endDate) {
-    // Fetch items in stock
-    $stockQuery = "SELECT item_name, item_type, SUM(quantity) as total_quantity FROM stock GROUP BY item_name, item_type";
-    $stockResult = $conn->query($stockQuery);
-    $stockItems = $stockResult->fetch_all(MYSQLI_ASSOC);
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date("Y-m-d");
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date("Y-m-d");
 
-    // Fetch items requested
-    $requestedQuery = "SELECT * FROM requisitions WHERE requisition_date BETWEEN ? AND ?";
-    $stmtRequested = $conn->prepare($requestedQuery);
-    $stmtRequested->bind_param("ss", $startDate, $endDate);
-    $stmtRequested->execute();
-    $requestedResult = $stmtRequested->get_result();
-    $requestedItems = $requestedResult->fetch_all(MYSQLI_ASSOC);
+$sql_all_stock = "SELECT item_name, item_type, SUM(quantity) AS total_quantity 
+                  FROM stock 
+                  GROUP BY item_name, item_type";
+$result_all_stock = $conn->query($sql_all_stock);
 
-    // Fetch items out in stock
-    $outStockQuery = "SELECT * FROM out_in_stock WHERE out_date BETWEEN ? AND ?";
-    $stmtOutStock = $conn->prepare($outStockQuery);
-    $stmtOutStock->bind_param("ss", $startDate, $endDate);
-    $stmtOutStock->execute();
-    $outStockResult = $stmtOutStock->get_result();
-    $outStockItems = $outStockResult->fetch_all(MYSQLI_ASSOC);
+$sql_stock_daily = "SELECT item_type, SUM(quantity) AS total_quantity 
+                    FROM stock 
+                    WHERE DATE(creation_date) BETWEEN '$start_date' AND '$end_date'
+                    GROUP BY item_type";
+$result_stock_daily = $conn->query($sql_stock_daily);
 
-    // Fetch items returned
-    $returnedQuery = "SELECT * FROM returned_items WHERE return_date BETWEEN ? AND ?";
-    $stmtReturned = $conn->prepare($returnedQuery);
-    $stmtReturned->bind_param("ss", $startDate, $endDate);
-    $stmtReturned->execute();
-    $returnedResult = $stmtReturned->get_result();
-    $returnedItems = $returnedResult->fetch_all(MYSQLI_ASSOC);
+$sql_requests_daily = "SELECT item_name, SUM(quantity) AS total_quantity, status 
+                       FROM requests 
+                       WHERE DATE(requisition_date) BETWEEN '$start_date' AND '$end_date'
+                       GROUP BY item_name, status";
+$result_requests_daily = $conn->query($sql_requests_daily);
 
-    return [
-        'stockItems' => $stockItems,
-        'requestedItems' => $requestedItems,
-        'outStockItems' => $outStockItems,
-        'returnedItems' => $returnedItems,
-    ];
-}
+$sql_return_daily = "SELECT item_name, returned_by, return_reason 
+                     FROM returned_items 
+                     WHERE DATE(returned_date) BETWEEN '$start_date' AND '$end_date'";
+$result_return_daily = $conn->query($sql_return_daily);
 
-if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
-    $startDate = $_GET['start_date'];
-    $endDate = $_GET['end_date'];
-    $reportData = generateReport($conn, $startDate, $endDate);
-
-    class PDF extends FPDF {
-        function Header() {
-            $this->SetFont('Arial', 'B', 12);
-            $this->Cell(0, 10, 'Stock Report', 0, 1, 'C');
-        }
-
-        function Footer() {
-            $this->SetY(-15);
-            $this->SetFont('Arial', 'I', 8);
-            $this->Cell(0, 10, 'Page ' . $this->PageNo(), 0, 0, 'C');
-        }
-
-        function ReportTable($header, $data) {
-            $this->SetFont('Arial', 'B', 12);
-            foreach ($header as $col) {
-                $this->Cell(40, 7, $col, 1);
-            }
-            $this->Ln();
-            $this->SetFont('Arial', '', 12);
-            foreach ($data as $row) {
-                foreach ($row as $col) {
-                    $this->Cell(40, 6, $col, 1);
-                }
-                $this->Ln();
-            }
-        }
-    }
-
-    $pdf = new PDF();
-    $pdf->AddPage();
-
-    // Items in Stock
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Items in Stock', 0, 1, 'L');
-    $pdf->SetFont('Arial', '', 12);
-    $header = ['Item Name', 'Item Type', 'Total Quantity'];
-    $data = array_map(function ($item) {
-        return [$item['item_name'], $item['item_type'], $item['total_quantity']];
-    }, $reportData['stockItems']);
-    $pdf->ReportTable($header, $data);
-
-    // Items Requested
-    $pdf->AddPage();
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Items Requested', 0, 1, 'L');
-    $pdf->SetFont('Arial', '', 12);
-    $header = ['ID', 'Serial Number', 'Requested By', 'Request Date'];
-    $data = array_map(function ($item) {
-        return [$item['id'], $item['serial_number'], $item['requested_by'], $item['requisition_date']];
-    }, $reportData['requestedItems']);
-    $pdf->ReportTable($header, $data);
-
-    // Items Out in Stock
-    $pdf->AddPage();
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Items Out in Stock', 0, 1, 'L');
-    $pdf->SetFont('Arial', '', 12);
-    $header = ['ID', 'Serial Number', 'Out Date'];
-    $data = array_map(function ($item) {
-        return [$item['id'], $item['serial_number'], $item['out_date']];
-    }, $reportData['outStockItems']);
-    $pdf->ReportTable($header, $data);
-
-    // Items Returned
-    $pdf->AddPage();
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Items Returned', 0, 1, 'L');
-    $pdf->SetFont('Arial', '', 12);
-    $header = ['ID', 'Serial Number', 'Returned By', 'Received By', 'Return Reason', 'Return Date', 'Is Working'];
-    $data = array_map(function ($item) {
-        return [
-            $item['id'],
-            $item['serial_number'],
-            $item['returned_by'],
-            $item['received_by'],
-            $item['return_reason'],
-            $item['return_date'],
-            $item['is_working']
-        ];
-    }, $reportData['returnedItems']);
-    $pdf->ReportTable($header, $data);
-
-    $pdf->Output('D', 'stock_report.pdf');
-}
+$sql_out_in_stock_daily = "SELECT item_name, SUM(quantity) AS total_quantity 
+                           FROM out_in_stock 
+                           WHERE DATE(created_at) BETWEEN '$start_date' AND '$end_date'
+                           GROUP BY item_name";
+$result_out_in_stock_daily = $conn->query($sql_out_in_stock_daily);
 
 $conn->close();
+
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+$pdf->SetCreator(PDF_CREATOR);
+$pdf->SetAuthor('Sator Rwanda Ltd'); 
+$pdf->SetTitle('Stock Report');
+$pdf->SetSubject('Stock Report');
+$pdf->SetKeywords('TCPDF, PDF, stock, report');
+
+
+$pdf->SetHeaderData('logo.png', 30, 'Stock Management System', "Report Date Range: $start_date to $end_date");
+
+
+$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+
+$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+// Set auto page breaks
+$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+// Set image scale factor
+$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+// Set font
+$pdf->SetFont('dejavusans', '', 10);
+
+// Add a page
+$pdf->AddPage();
+
+// Title
+$pdf->Cell(0, 10, 'Stock Report', 0, 1, 'C');
+
+// Items in Stock (All)
+$pdf->Ln(5);
+$pdf->SetFont('dejavusans', 'B', 12);
+$pdf->Cell(0, 10, 'Items in Stock (All)', 0, 1, 'L');
+$pdf->SetFont('dejavusans', '', 10);
+if ($result_all_stock && $result_all_stock->num_rows > 0) {
+    while ($row = $result_all_stock->fetch_assoc()) {
+        $pdf->Cell(0, 10, $row["item_type"] . ': ' . $row["total_quantity"], 0, 1);
+    }
+} else {
+    $pdf->Cell(0, 10, 'No items in stock found.', 0, 1);
+}
+
+// Items in Stock (Daily)
+$pdf->Ln(5);
+$pdf->SetFont('dejavusans', 'B', 12);
+$pdf->Cell(0, 10, 'Items in Stock (Daily)', 0, 1, 'L');
+$pdf->SetFont('dejavusans', '', 10);
+if ($result_stock_daily && $result_stock_daily->num_rows > 0) {
+    while ($row = $result_stock_daily->fetch_assoc()) {
+        $pdf->Cell(0, 10, $row["item_type"] . ': ' . $row["total_quantity"], 0, 1);
+    }
+} else {
+    $pdf->Cell(0, 10, 'No items in stock found for the selected date range.', 0, 1);
+}
+
+// Requests for Date Range
+$pdf->Ln(5);
+$pdf->SetFont('dejavusans', 'B', 12);
+$pdf->Cell(0, 10, 'Requests for the Selected Date Range', 0, 1, 'L');
+$pdf->SetFont('dejavusans', '', 10);
+if ($result_requests_daily && $result_requests_daily->num_rows > 0) {
+    while ($row = $result_requests_daily->fetch_assoc()) {
+        $pdf->Cell(0, 10, $row["item_name"] . ': ' . $row["total_quantity"] . ' (' . $row["status"] . ')', 0, 1);
+    }
+} else {
+    $pdf->Cell(0, 10, 'No requests found for the selected date range.', 0, 1);
+}
+
+// Items Returned for Date Range
+$pdf->Ln(5);
+$pdf->SetFont('dejavusans', 'B', 12);
+$pdf->Cell(0, 10, 'Items Returned for the Selected Date Range', 0, 1, 'L');
+$pdf->SetFont('dejavusans', '', 10);
+if ($result_return_daily && $result_return_daily->num_rows > 0) {
+    while ($row = $result_return_daily->fetch_assoc()) {
+        $pdf->Cell(0, 10, $row["item_name"] . ': Returned by ' . $row["returned_by"] . ' (' . $row["return_reason"] . ')', 0, 1);
+    }
+} else {
+    $pdf->Cell(0, 10, 'No items returned found for the selected date range.', 0, 1);
+}
+
+// Items Out in Stock for Date Range
+$pdf->Ln(5);
+$pdf->SetFont('dejavusans', 'B', 12);
+$pdf->Cell(0, 10, 'Items Out in Stock for the Selected Date Range', 0, 1, 'L');
+$pdf->SetFont('dejavusans', '', 10);
+if ($result_out_in_stock_daily && $result_out_in_stock_daily->num_rows > 0) {
+    while ($row = $result_out_in_stock_daily->fetch_assoc()) {
+        $pdf->Cell(0, 10, $row["item_name"] . ': ' . $row["total_quantity"], 0, 1);
+    }
+} else {
+    $pdf->Cell(0, 10, 'No items out in stock found for the selected date range.', 0, 1);
+}
+
+// Close and output PDF document
+$pdf->Output('stock_report.pdf', 'I');
 ?>

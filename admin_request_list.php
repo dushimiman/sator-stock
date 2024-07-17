@@ -5,8 +5,12 @@ include('includes/db.php');
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 
 function approveRequest($conn, $request_id) {
-    $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
-    if ($conn->query($sql) === true) {
+    // Update request status to 'approved'
+    $sql = "UPDATE requests SET status = 'approved' WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $request_id);
+    
+    if ($stmt->execute()) {
         return true;
     } else {
         return false;
@@ -14,7 +18,6 @@ function approveRequest($conn, $request_id) {
 }
 
 $sql = "SELECT * FROM requests";
-
 
 if (!empty($searchTerm)) {
     $searchTerm = $conn->real_escape_string($searchTerm);
@@ -35,6 +38,12 @@ if ($result === false) {
     <title>All Requests</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .btn-out-success {
+            background-color: #28a745 !important; /* Green color */
+            border-color: #28a745 !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -73,7 +82,7 @@ if ($result === false) {
                         if ($row['status'] === 'pending') {
                             echo "<span class='text-muted'>Pending Approval</span>";
                         } elseif ($row['status'] === 'approved') {
-                            echo "<a class='btn btn-warning btn-sm' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>";
+                            echo "<a class='btn btn-warning btn-sm btn-out-success' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>";
                         }
 
                         echo "<a class='btn btn-primary btn-sm ml-1' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";

@@ -30,7 +30,7 @@ $result_requests_monthly = $conn->query($sql_requests_monthly);
 
 $sql_out_in_stock_monthly = "SELECT item_name, SUM(quantity) AS total_quantity 
                              FROM out_in_stock 
-                             WHERE DATE_FORMAT(out_date, '%Y-%m') = '$current_month' 
+                             WHERE DATE_FORMAT(created_at, '%Y-%m') = '$current_month' 
                              GROUP BY item_name";
 $result_out_in_stock_monthly = $conn->query($sql_out_in_stock_monthly);
 
@@ -57,7 +57,7 @@ $conn->close();
 </head>
 <body>
     <div class="container">
-        <h2 class="mt-4">Stock Report - Monthly (<?php echo $current_month; ?>)</h2>
+        <h4 class="mt-4">Stock Report - Monthly (<?php echo $current_month; ?>)</h4>
 
         <div class="mt-4">
             <h3>Items in Stock</h3>
@@ -130,6 +130,10 @@ $conn->close();
                     ?>
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-4">
+            <a href="generate_pdf_month.php?start_date=<?php echo $start_date; ?>&end_date=<?php echo $end_date; ?>" target="_blank" class="btn btn-primary">Generate PDF Report</a>
         </div>
     </div>
 

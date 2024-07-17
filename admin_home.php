@@ -6,15 +6,12 @@ $username = "root";
 $password = "";
 $dbname = "stock_management_system";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Query to fetch data for doughnut chart (item_type and quantity)
 $sql = "SELECT item_type, SUM(quantity) AS total_quantity FROM stock GROUP BY item_type";
 $result = $conn->query($sql);
 
@@ -27,13 +24,9 @@ if ($result->num_rows > 0) {
     }
 }
 
-
-
 // Query to check for low stock items
 $sql_low_stock_items = "SELECT item_type, SUM(quantity) AS total_quantity FROM stock GROUP BY item_type HAVING SUM(quantity) < 5";
 $result_low_stock_items = $conn->query($sql_low_stock_items);
-
-
 
 $sql_total_items_in_stock = "SELECT SUM(quantity) AS total_items_in_stock FROM stock";
 $result_total_items_in_stock = $conn->query($sql_total_items_in_stock);
@@ -45,7 +38,6 @@ if ($result_total_items_in_stock->num_rows > 0) {
     $total_items_in_stock = 0; // Default to 0 if no records found
 }
 
-// Query to fetch total items requested (assuming requests table structure)
 $sql_total_items_requested = "SELECT COUNT(*) AS total_items_requested FROM requests";
 $result_total_items_requested = $conn->query($sql_total_items_requested);
 
@@ -56,7 +48,6 @@ if ($result_total_items_requested->num_rows > 0) {
     $total_items_requested = 0; // Default to 0 if no records found
 }
 
-// Query to fetch total items out of stock (assuming out_in_stock table structure)
 $sql_total_items_out_of_stock = "SELECT COUNT(*) AS total_items_out_of_stock FROM out_in_stock";
 $result_total_items_out_of_stock = $conn->query($sql_total_items_out_of_stock);
 
@@ -67,7 +58,6 @@ if ($result_total_items_out_of_stock->num_rows > 0) {
     $total_items_out_of_stock = 0; // Default to 0 if no records found
 }
 
-// Query to fetch total repaired items (assuming returned_items table structure)
 $sql_total_repaired_items = "SELECT COUNT(*) AS total_repaired_items FROM returned_items WHERE is_working = 1";
 $result_total_repaired_items = $conn->query($sql_total_repaired_items);
 
@@ -95,7 +85,10 @@ $conn->close();
             background-color: #f8f9fa;
             color: #343a40;
             padding: 20px;
-            font-size: small; /* Set default font size to small */
+            font-size: small; 
+        }
+        .top-margin {
+            margin-top: 20px;
         }
         #itemChartContainer {
             max-width: 800px; 
@@ -111,26 +104,51 @@ $conn->close();
             margin-bottom: 20px;
         }
         .card {
-            animation: scale-in 0.5s ease; /* Add animation to cards */
             margin-bottom: 20px;
         }
-        @keyframes scale-in {
-            0% {
-                transform: scale(0.9);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
         .card-title {
-            font-size: medium; /* Set font size of card titles */
+            font-size: medium; 
+        }
+        .icon-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .icon-bar .icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .dropdown-menu {
+            left: auto;
+            right: 0;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container-fluid top-margin">
+        <div class="icon-bar">
+            <div class="icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="dropdown">
+                <div class="icon dropdown-toggle" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="dropdown-menu" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="#">Logout</a>
+                </div>
+            </div>
+        </div>
+
         <div class="row mb-4">
-            <!-- Total Quantity Card -->
+           
             <div class="col-md-3">
                 <div class="card text-white bg-primary">
                     <div class="card-body">
@@ -171,10 +189,10 @@ $conn->close();
             </div>
         </div>
 
-        <!-- Doughnut Chart and Low Stock Modal -->
+       
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
-                <!-- <h1 class="mt-4 mb-4 text-center">Stock Management Dashboard</h1> -->
+               
                 <div class="row mb-4">
                     <div class="col-md-8">
                         <div id="itemChartContainer">
@@ -182,7 +200,7 @@ $conn->close();
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <!-- Notification Modal for Low Stock Items -->
+                       
                         <div class="modal fade modal-notification" id="lowStockModal" tabindex="-1" role="dialog" aria-labelledby="lowStockModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
@@ -201,62 +219,52 @@ $conn->close();
                                                 <?php endwhile; ?>
                                             </ul>
                                         <?php else: ?>
-                                            <p>No items have low quantities in stock.</p>
+                                            <p>No items with low quantities in stock.</p>
                                         <?php endif; ?>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                       
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    
     <script>
-        // Doughnut Chart Data
-        var dataPoints = <?php echo json_encode($dataPoints, JSON_NUMERIC_CHECK); ?>;
-        
-        var ctx = document.getElementById('itemChart').getContext('2d');
-        var itemChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: dataPoints.map(dp => dp.label),
-                datasets: [{
-                    label: 'Item Quantities',
-                    data: dataPoints.map(dp => dp.y),
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.6)',
-                        'rgba(54, 162, 235, 0.6)',
-                        'rgba(255, 206, 86, 0.6)',
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(153, 102, 255, 0.6)',
-                        'rgba(255, 159, 64, 0.6)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    position: 'right'
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById('itemChart').getContext('2d');
+            var itemChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: <?php echo json_encode(array_column($dataPoints, 'label')); ?>,
+                    datasets: [{
+                        data: <?php echo json_encode(array_column($dataPoints, 'y')); ?>,
+                        backgroundColor: ['#007bff', '#6c757d', '#dc3545', '#28a745', '#ffc107', '#17a2b8', '#fd7e14', '#343a40', '#6610f2'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    // animation: {
+                    //     animateScale: false,
+                    //     animateRotate: false
+                    // }
                 }
-            }
-        });
+            });
 
-        // Show low stock modal if there are low stock items
-        $(document).ready(function() {
-            <?php if ($result_low_stock_items->num_rows > 0): ?>
-                $('#lowStockModal').modal('show');
-            <?php endif; ?>
+            
+            $('#lowStockModal').modal('show');
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

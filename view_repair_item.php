@@ -26,7 +26,7 @@ function viewRepairedItems($conn, $search = '') {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-striped table-bordered'>";
         echo "<thead class='thead-dark'>";
-        echo "<tr><th>ID</th><th>Item Name</th><th>Serial Number</th><th>Returned By</th><th>Received By</th><th>Return Reason</th><th>Return Date</th></tr>";
+        echo "<tr><th>ID</th><th>Item Name</th><th>Serial Number</th><th>IMEI</th><th>Returned By</th><th>Return Reason</th><th>Return Date</th></tr>";
         echo "</thead>";
         echo "<tbody>";
         while ($row = $result->fetch_assoc()) {
@@ -34,8 +34,8 @@ function viewRepairedItems($conn, $search = '') {
             echo "<td>" . $row["id"] . "</td>";
             echo "<td>" . $row["item_name"] . "</td>";
             echo "<td>" . $row["serial_number"] . "</td>";
+            echo "<td>" . $row["imei_number"] . "</td>";
             echo "<td>" . $row["returned_by"] . "</td>";
-            echo "<td>" . $row["received_by"] . "</td>";
             echo "<td>" . $row["return_reason"] . "</td>";
             echo "<td>" . $row["returned_date"] . "</td>";
             echo "</tr>";

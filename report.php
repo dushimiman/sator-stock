@@ -26,7 +26,7 @@ include('includes/nav_bar.php');?>
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Generate Daily Report</h5>
+                        <h6 class="card-title">Generate Report by Date</h6>
                         <form action="daily_report.php" method="post">
                             <button type="submit" class="btn btn-primary btn-block">Generate Report</button>
                         </form>
@@ -34,25 +34,12 @@ include('includes/nav_bar.php');?>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Generate Report by Date</h5>
-                        <form action="date_report.php" method="post">
-                            <div class="form-group">
-                                <label for="date">Select Date:</label>
-                                <input type="date" id="date" name="date" class="form-control">
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Generate Report</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            
 
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Generate Monthly Report</h5>
+                        <h6 class="card-title">Generate Monthly Report</h6>
                         <form action="monthly_report.php" method="post">
                             <button type="submit" class="btn btn-primary btn-block">Generate Report</button>
                         </form>

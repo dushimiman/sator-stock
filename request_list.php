@@ -43,7 +43,15 @@ function approveRequest($conn, $request_id) {
                 echo "Error updating request status: " . $conn->error;
             }
         } else {
-            echo "Error: Requested quantity ($requested_quantity) exceeds available stock for item '$item_name'.";
+            // Fetch total available quantity for the item
+            $stmt = $conn->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
+            $stmt->bind_param("s", $item_name);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stock = $result->fetch_assoc();
+            $available_quantity = $stock['total_quantity'];
+
+            echo "Error: Requested quantity ($requested_quantity) exceeds available stock for item '$item_name'. In stock we have $available_quantity quantity.";
         }
     } else {
         echo "Error: Request not found or multiple requests found.";

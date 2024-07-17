@@ -11,7 +11,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $branch = 'HQS'; 
     $creation_date = date("Y-m-d H:i:s");
 
-   
     if ($item_name == "SPEED GOVERNORS") {
         if ($item_type == "SPG 001") {
             if (!empty($serial_number) && !preg_match('/^[A-Za-z]{2}\d{12}$/', $serial_number)) {
@@ -24,7 +23,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    
     if ($item_name == "GPS TRACKERS") {
         if (!empty($serial_number) && !preg_match('/^\d{6}$/', $serial_number)) {
             die('Serial number must be exactly 6 numbers.');
@@ -57,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die('Execute failed: ' . htmlspecialchars($stmt->error));
     }
 
-    
     header("Location: view_all_item.php");
     exit;
 
@@ -74,6 +71,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        .container {
+            margin-top: 20px; /* Adjust the margin value as needed */
+        }
         .form-container {
             max-width: 600px; 
             margin: auto;
@@ -187,28 +187,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="ENVELOPPE">ENVELOPPE</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label for="type">Type:</label>
+                    <label for="type">Item Type:</label>
                     <select id="type" name="type" class="form-control"></select>
                 </div>
-
-                <div class="form-group" id="serial_number_field">
+                <div id="serial_number_field" class="form-group" style="display: none;">
                     <label for="serial_number">Serial Number:</label>
                     <input type="text" id="serial_number" name="serial_number" class="form-control">
                 </div>
-
-                <div class="form-group" id="imei_field">
+                <div id="imei_field" class="form-group" style="display: none;">
                     <label for="imei">IMEI:</label>
                     <input type="text" id="imei" name="imei" class="form-control">
                 </div>
-
-                <div class="form-group" id="quantity_field">
+                <div id="quantity_field" class="form-group">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" class="form-control">
                 </div>
-
-                <button type="submit" class="btn btn-primary btn-block">Add Item</button>
+                <button type="submit" class="btn btn-primary">Add Item</button>
             </form>
         </div>
     </div>

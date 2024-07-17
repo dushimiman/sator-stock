@@ -13,7 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Define item categories and types
+
 $itemTypes = array(
     'SPEED GOVERNORS' => ['SPG 001', 'Only SPG 001 Without Antenna', 'Only SPG 001 Without Display', 'Only SPG 001 Without Antenna and Display', 'R0SCO', 'R0SCO Not Working', 'SG 001 Not Working'],
     'GPS TRACKERS' => ['TK 116', 'TK 119', 'TK 419', 'TK 115', 'MT02S', 'GUT 810G1_Fluel', 'GT06E/teltonika', 'FMB125', 'Gps Not Working/MT02S', 'GPS Not Working'],
@@ -54,59 +54,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Error returning item: " . $stmtInsert->error;
         }
     } else {
-        $checkQuery = "SELECT * FROM out_in_stock WHERE serial_number = ?";
-        $stmtCheck = $conn->prepare($checkQuery);
+       
+        $insertQuery = "INSERT INTO returned_items (item_name, item_type, serial_number, imei_number, returned_by, received_by, return_reason, is_working) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmtInsert = $conn->prepare($insertQuery);
 
-        if ($stmtCheck === false) {
-            die("Error preparing the query: " . $conn->error);
+        if ($stmtInsert === false) {
+            die("Error preparing the insert query: " . $conn->error);
         }
 
-        $stmtCheck->bind_param("s", $serialNumber);
-        $stmtCheck->execute();
-        $result = $stmtCheck->get_result();
+        $stmtInsert->bind_param("sssssssi", $itemName, $itemType, $serialNumber, $imeiNumber, $returnedBy, $receivedBy, $returnReason, $isWorking);
 
-        if ($result->num_rows > 0) {
-            $item = $result->fetch_assoc();
-            $itemName = $item['item_name'];
+        if ($stmtInsert->execute()) {
+            $insertStockQuery = "INSERT INTO stock (item_name, serial_number, branch, creation_date, quantity, status) VALUES (?, ?, ?, NOW(), 1, ?)";
+            $status = $isWorking ? 'returned but working' : 'returned but not working';
+            $stmtInsertStock = $conn->prepare($insertStockQuery);
 
-            $insertQuery = "INSERT INTO returned_items (item_name, item_type, serial_number, imei_number, returned_by, received_by, return_reason, is_working) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmtInsert = $conn->prepare($insertQuery);
-
-            if ($stmtInsert === false) {
-                die("Error preparing the insert query: " . $conn->error);
+            if ($stmtInsertStock === false) {
+                die("Error preparing the stock insert query: " . $conn->error);
             }
 
-            $stmtInsert->bind_param("sssssssi", $itemName, $itemType, $serialNumber, $imeiNumber, $returnedBy, $receivedBy, $returnReason, $isWorking);
+            // Assuming $branch is defined
+            $stmtInsertStock->bind_param("ssss", $itemName, $serialNumber, $branch, $status);
+            $stmtInsertStock->execute();
 
-            if ($stmtInsert->execute()) {
-                $deleteQuery = "DELETE FROM out_in_stock WHERE serial_number = ?";
-                $stmtDelete = $conn->prepare($deleteQuery);
-
-                if ($stmtDelete === false) {
-                    die("Error preparing the delete query: " . $conn->error);
-                }
-
-                $stmtDelete->bind_param("s", $serialNumber);
-                $stmtDelete->execute();
-
-                $insertStockQuery = "INSERT INTO stock (item_name, serial_number, branch, creation_date, quantity, status) VALUES (?, ?, ?, NOW(), 1, ?)";
-                $status = $isWorking ? 'returned but working' : 'returned but not working';
-                $stmtInsertStock = $conn->prepare($insertStockQuery);
-
-                if ($stmtInsertStock === false) {
-                    die("Error preparing the stock insert query: " . $conn->error);
-                }
-
-                // Assuming $branch is defined
-                $stmtInsertStock->bind_param("ssss", $itemName, $serialNumber, $branch, $status);
-                $stmtInsertStock->execute();
-
-                echo "Item returned successfully.";
-            } else {
-                echo "Error returning item: " . $stmtInsert->error;
-            }
+            echo "Item returned successfully.";
         } else {
-            echo "Serial number not found in out_in_stock table.";
+            echo "Error returning item: " . $stmtInsert->error;
         }
     }
 }
@@ -122,8 +95,29 @@ $conn->close();
     <title>Items Return Form</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            margin-top: 20px;
+            border: 1px solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+        }
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: .75rem 1.25rem;
+            border-bottom: 1px solid rgba(0,0,0,.125);
+        }
         .card-body {
             padding: 1.25rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        #imei_number_field {
+            display: none;
         }
     </style>
     <script>
@@ -141,7 +135,7 @@ $conn->close();
                     typeSelect.add(option);
                 });
             }
-            
+
             // Show/hide IMEI number field based on item type selection
             var imeiField = document.getElementById("imei_number_field");
             if (itemName === "GPS TRACKERS") {
@@ -153,12 +147,12 @@ $conn->close();
     </script>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="text-center">Items Return Form</h2>
+                        <h5 class="text-center">Items Return Form</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -177,12 +171,12 @@ $conn->close();
                                     <option value="">Select Item Type</option>
                                 </select>
                             </div>
-                            <div class="form-group" id="imei_number_field" style="display: none;">
-                                <label for="imei_number">IMEI Number:</label>
+                            <div class="form-group" id="imei_number_field">
+                                <label for="imei_number">IMEI:</label>
                                 <input type="text" id="imei_number" name="imei_number" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label for="serial_number">S/N:</label>
+                                <label for="serial_number">Serial Number:</label>
                                 <input type="text" id="serial_number" name="serial_number" class="form-control">
                             </div>
                             <div class="form-group">
