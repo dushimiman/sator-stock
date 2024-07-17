@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
             }
         } else {
-            // For items other than GPS TRACKERS and SPEED GOVERNORS
+       
             $sql = "SELECT quantity FROM stock WHERE item_name = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt === false) {
@@ -213,4 +213,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </body>
 </html>
-

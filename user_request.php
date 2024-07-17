@@ -1,83 +1,42 @@
 <?php
-include('includes/user_nav_bar.php');
-include('includes/db.php');
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "stock_management_system";
 
-function approveRequest($conn, $request_id) {
-    $sql = "UPDATE requests SET status = 'approved' WHERE id = $request_id";
-    if ($conn->query($sql) === true) {
-        return true;
-    } else {
-        return false;
-    }
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT *, qc.comment AS change_comment
-        FROM requests r
-        LEFT JOIN quantity_change_log qc ON r.id = qc.request_id
-        ORDER BY r.requisition_date DESC";
-$result = $conn->query($sql);
+$requisition_date = $_POST['requisition_date'] ?? '';
+$requested_by = $_POST['requested_by'] ?? '';
+$item_name = $_POST['item_name'] ?? '';
+$quantity = $_POST['quantity'] ?? 0;
+$location = $_POST['location'] ?? '';
+$payment_description = $_POST['payment_description'] ?? '';
+$reasons = $_POST['reasons'] ?? '';
 
-if ($result === false) {
-    die("Error executing the query: " . $conn->error);
+$status = isset($_POST['status']) ? $_POST['status'] : ''; 
+
+$sql = "INSERT INTO requests (requisition_date, requested_by, item_name, quantity, location, payment_description, reasons, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+
+if ($stmt === false) {
+    die("Error preparing the query: " . $conn->error);
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>All Requests</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    
-    <div class="container mt-4">
-        
-        <h2 class="text-center mb-4">All Requests</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
-                    <tr>
-                       
-                        <th>Requisition Date</th>
-                        <th>Requested By</th>
-                        <th>Item Name</th>
-                        <th>Quantity</th>
-                        <th>Status</th>
-                        <th>Change Comment</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<tr>";
-                            
-                            echo "<td>" . $row['requisition_date'] . "</td>";
-                            echo "<td>" . $row['requested_by'] . "</td>";
-                            echo "<td>" . $row['item_name'] . "</td>";
-                            echo "<td>" . $row['quantity'] . "</td>";
-                            echo "<td>" . $row['status'] . "</td>";
-                            echo "<td>" . ($row['change_comment'] ?? '') . "</td>"; 
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='7' class='text-center'>No requests found</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+$stmt->bind_param("sssiisss", $requisition_date, $requested_by, $item_name, $quantity, $location, $payment_description, $reasons, $status);
+$executeResult = $stmt->execute();
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+if ($executeResult) {
+    echo "Request submitted successfully.";
+} else {
+    echo "Error executing the query: " . $stmt->error;
+}
 
-<?php
+$stmt->close();
 $conn->close();
 ?>
-

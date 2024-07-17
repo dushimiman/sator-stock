@@ -1,16 +1,21 @@
 <?php
+// Include necessary files and initialize database connection
 include('includes/nav_bar.php');
-include('includes/db.php'); 
+include('includes/db.php');
 
+// Check if form is submitted via POST method
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve form data
     $item_name = $_POST['item'];
     $item_type = $_POST['type'];
     $serial_number = isset($_POST['serial_number']) ? $_POST['serial_number'] : null;
     $imei = isset($_POST['imei']) ? $_POST['imei'] : null;
     $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : null;
-    $branch = 'HQS'; 
+  
+    // Get current timestamp for creation date
     $creation_date = date("Y-m-d H:i:s");
 
+    // Validate serial number and IMEI based on item type
     if ($item_name == "SPEED GOVERNORS") {
         if ($item_type == "SPG 001") {
             if (!empty($serial_number) && !preg_match('/^[A-Za-z]{2}\d{12}$/', $serial_number)) {
@@ -32,32 +37,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // Set quantity to 1 if serial number is provided
     if (!empty($serial_number)) {
         $quantity = 1;
     } else {
-        $serial_number = null; 
+        $serial_number = null; // Set serial number to null if not provided
     }
 
-    $query = "INSERT INTO stock (item_name, item_type, serial_number, imei, branch, creation_date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    
+    // Prepare INSERT query
+    $query = "INSERT INTO stock (item_name, item_type, serial_number, imei, quantity, creation_date) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
+
+    // Check if prepare was successful
     if ($stmt === false) {
         die('Prepare failed: ' . htmlspecialchars($conn->error));
     }
 
-    $bind = $stmt->bind_param("ssssssi", $item_name, $item_type, $serial_number, $imei, $branch, $creation_date, $quantity);
+    // Bind parameters
+    $bind = $stmt->bind_param("ssssis", $item_name, $item_type, $serial_number, $imei, $quantity, $creation_date);
+
+    // Check if bind_param was successful
     if ($bind === false) {
         die('Bind param failed: ' . htmlspecialchars($stmt->error));
     }
 
+    // Execute query
     $execute = $stmt->execute();
+
+    // Check if execute was successful
     if ($execute === false) {
         die('Execute failed: ' . htmlspecialchars($stmt->error));
     }
 
+    // Redirect to view all items page after successful insertion
     header("Location: view_all_item.php");
     exit;
 
+    // Close statement and connection
     $stmt->close();
     $conn->close();
 }
@@ -87,6 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        // JavaScript functions for form interaction
         const itemTypes = {
             'SPEED GOVERNORS': ['SPG 001', 'Only SPG 001 Without Antenna', 'Only SPG 001 Without Display', 'Only SPG 001 Without Antenna and Display', 'R0SCO', 'R0SCO Not Working', 'SG 001 Not Working'],
             'GPS TRACKERS': ['TK 116', 'TK 119', 'TK 419', 'TK 115', 'MT02S', 'GUT 810G1_Fluel', 'GT06E/teltonika', 'FMB125', 'Gps Not Working/MT02S', 'GPS Not Working'],
@@ -170,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="form-container">
             <h2 class="mt-4 mb-4 text-center">Add Item to Stock</h2>
-            <form method="POST" action="add_item.php" onsubmit="return validateForm()">
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label for="item">Item:</label>
                     <select id="item" name="item" onchange="updateForm()" class="form-control">
@@ -191,19 +208,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="type">Item Type:</label>
                     <select id="type" name="type" class="form-control"></select>
                 </div>
-                <div id="serial_number_field" class="form-group" style="display: none;">
+                <div class="form-group" id="serial_number_field">
                     <label for="serial_number">Serial Number:</label>
                     <input type="text" id="serial_number" name="serial_number" class="form-control">
                 </div>
-                <div id="imei_field" class="form-group" style="display: none;">
+                <div class="form-group" id="imei_field">
                     <label for="imei">IMEI:</label>
                     <input type="text" id="imei" name="imei" class="form-control">
                 </div>
-                <div id="quantity_field" class="form-group">
+                <div class="form-group" id="quantity_field">
                     <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control">
+                    <input type="number" id="quantity" name="quantity" value="1" class="form-control">
                 </div>
-                <button type="submit" class="btn btn-primary">Add Item</button>
+                <button type="submit" class="btn btn-primary btn-block">Add Item</button>
             </form>
         </div>
     </div>

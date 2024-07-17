@@ -37,9 +37,16 @@ function viewRepairedItems($conn, $search = '') {
             echo "<td>" . $row["imei_number"] . "</td>";
             echo "<td>" . $row["returned_by"] . "</td>";
             echo "<td>" . $row["return_reason"] . "</td>";
-            echo "<td>" . $row["returned_date"] . "</td>";
+            echo "<td>";
+            if (isset($row["returned_date"])) {
+                echo $row["returned_date"];
+            } else {
+                echo "N/A";
+            }
+            echo "</td>";
             echo "</tr>";
         }
+        
         echo "</tbody></table>";
         echo "</div>";
     } else {
