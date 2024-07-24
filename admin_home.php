@@ -6,67 +6,51 @@ $username = "root";
 $password = "";
 $dbname = "stock_management_system";
 
+// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT item_type, SUM(quantity) AS total_quantity FROM stock GROUP BY item_type";
+// Query to count the number of unique item types
+$sql = "SELECT item_type, COUNT(*) AS total_count FROM stock GROUP BY item_type";
 $result = $conn->query($sql);
 
 $dataPoints = array();
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $dataPoint = array("label" => $row['item_type'], "y" => $row['total_quantity']);
+        $dataPoint = array("label" => $row['item_type'], "y" => $row['total_count']);
         array_push($dataPoints, $dataPoint);
     }
 }
 
-// Query to check for low stock items
-$sql_low_stock_items = "SELECT item_type, SUM(quantity) AS total_quantity FROM stock GROUP BY item_type HAVING SUM(quantity) < 5";
+// Query to count low stock items (less than 5)
+$sql_low_stock_items = "SELECT item_type, COUNT(*) AS total_count FROM stock GROUP BY item_type HAVING SUM(quantity) < 5";
 $result_low_stock_items = $conn->query($sql_low_stock_items);
 
-$sql_total_items_in_stock = "SELECT SUM(quantity) AS total_items_in_stock FROM stock";
+// Query to count total unique item types in stock
+$sql_total_items_in_stock = "SELECT COUNT(DISTINCT item_type) AS total_items_in_stock FROM stock";
 $result_total_items_in_stock = $conn->query($sql_total_items_in_stock);
+$total_items_in_stock = $result_total_items_in_stock->num_rows > 0 ? $result_total_items_in_stock->fetch_assoc()['total_items_in_stock'] : 0;
 
-if ($result_total_items_in_stock->num_rows > 0) {
-    $row = $result_total_items_in_stock->fetch_assoc();
-    $total_items_in_stock = $row['total_items_in_stock'];
-} else {
-    $total_items_in_stock = 0; // Default to 0 if no records found
-}
-
+// Query to count total items requested
 $sql_total_items_requested = "SELECT COUNT(*) AS total_items_requested FROM requests";
 $result_total_items_requested = $conn->query($sql_total_items_requested);
+$total_items_requested = $result_total_items_requested->num_rows > 0 ? $result_total_items_requested->fetch_assoc()['total_items_requested'] : 0;
 
-if ($result_total_items_requested->num_rows > 0) {
-    $row = $result_total_items_requested->fetch_assoc();
-    $total_items_requested = $row['total_items_requested'];
-} else {
-    $total_items_requested = 0; // Default to 0 if no records found
-}
-
+// Query to count total items out of stock
 $sql_total_items_out_of_stock = "SELECT COUNT(*) AS total_items_out_of_stock FROM out_in_stock";
 $result_total_items_out_of_stock = $conn->query($sql_total_items_out_of_stock);
+$total_items_out_of_stock = $result_total_items_out_of_stock->num_rows > 0 ? $result_total_items_out_of_stock->fetch_assoc()['total_items_out_of_stock'] : 0;
 
-if ($result_total_items_out_of_stock->num_rows > 0) {
-    $row = $result_total_items_out_of_stock->fetch_assoc();
-    $total_items_out_of_stock = $row['total_items_out_of_stock'];
-} else {
-    $total_items_out_of_stock = 0; // Default to 0 if no records found
-}
-
+// Query to count total repaired items
 $sql_total_repaired_items = "SELECT COUNT(*) AS total_repaired_items FROM returned_items WHERE is_working = 1";
 $result_total_repaired_items = $conn->query($sql_total_repaired_items);
+$total_repaired_items = $result_total_repaired_items->num_rows > 0 ? $result_total_repaired_items->fetch_assoc()['total_repaired_items'] : 0;
 
-if ($result_total_repaired_items->num_rows > 0) {
-    $row = $result_total_repaired_items->fetch_assoc();
-    $total_repaired_items = $row['total_repaired_items'];
-} else {
-    $total_repaired_items = 0; // Default to 0 if no records found
-}
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -148,51 +132,53 @@ $conn->close();
         </div>
 
         <div class="row mb-4">
-           
             <div class="col-md-3">
                 <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Quantity in Stock</h5>
-                        <p class="card-text"><?php echo $total_items_in_stock; ?></p>
-                    </div>
+                    <a href="view_all_item.php" class="text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total items in Stock</h5>
+                            <p class="card-text"><?php echo $total_items_in_stock; ?></p>
+                        </div>
+                    </a>
                 </div>
             </div>
 
-            <!-- Total Items Requested Card -->
             <div class="col-md-3">
                 <div class="card text-white bg-secondary">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Items Requested</h5>
-                        <p class="card-text"><?php echo $total_items_requested; ?></p>
-                    </div>
+                    <a href="admin_request_list.php" class="text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Items Requested</h5>
+                            <p class="card-text"><?php echo $total_items_requested; ?></p>
+                        </div>
+                    </a>
                 </div>
             </div>
 
-            <!-- Total Items Out of Stock Card -->
             <div class="col-md-3">
                 <div class="card text-white bg-danger">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Items Out of Stock</h5>
-                        <p class="card-text"><?php echo $total_items_out_of_stock; ?></p>
-                    </div>
+                    <a href="view_out_in_stock.php" class="text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Items Out of Stock</h5>
+                            <p class="card-text"><?php echo $total_items_out_of_stock; ?></p>
+                        </div>
+                    </a>
                 </div>
             </div>
 
-            <!-- Total Repaired Items Card -->
             <div class="col-md-3">
                 <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Repaired Items</h5>
-                        <p class="card-text"><?php echo $total_repaired_items; ?></p>
-                    </div>
+                    <a href="view_repair_item.php" class="text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Repaired Items</h5>
+                            <p class="card-text"><?php echo $total_repaired_items; ?></p>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
 
-       
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
-               
                 <div class="row mb-4">
                     <div class="col-md-8">
                         <div id="itemChartContainer">
@@ -200,7 +186,6 @@ $conn->close();
                         </div>
                     </div>
                     <div class="col-md-4">
-                       
                         <div class="modal fade modal-notification" id="lowStockModal" tabindex="-1" role="dialog" aria-labelledby="lowStockModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
@@ -215,7 +200,7 @@ $conn->close();
                                             <p>Some items have low quantities in stock:</p>
                                             <ul>
                                                 <?php while ($row = $result_low_stock_items->fetch_assoc()): ?>
-                                                    <li><?php echo htmlspecialchars($row['item_type']) . ' (Total Quantity: ' . htmlspecialchars($row['total_quantity']) . ')'; ?></li>
+                                                    <li><?php echo htmlspecialchars($row['item_type']) . ' (Total Quantity: ' . htmlspecialchars($row['total_count']) . ')'; ?></li>
                                                 <?php endwhile; ?>
                                             </ul>
                                         <?php else: ?>
@@ -225,46 +210,55 @@ $conn->close();
                                 </div>
                             </div>
                         </div>
-                       
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
+    <script>
+window.onload = function() {
+    var ctx = document.getElementById('itemChart').getContext('2d');
+    var itemChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: <?php echo json_encode(array_column($dataPoints, "label")); ?>,
+            datasets: [{
+                label: 'Item Types in Stock',
+                data: <?php echo json_encode(array_column($dataPoints, "y")); ?>,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    <?php if ($result_low_stock_items->num_rows > 0): ?>
+        $('#lowStockModal').modal('show');
+    <?php endif; ?>
+};
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var ctx = document.getElementById('itemChart').getContext('2d');
-            var itemChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: <?php echo json_encode(array_column($dataPoints, 'label')); ?>,
-                    datasets: [{
-                        data: <?php echo json_encode(array_column($dataPoints, 'y')); ?>,
-                        backgroundColor: ['#007bff', '#6c757d', '#dc3545', '#28a745', '#ffc107', '#17a2b8', '#fd7e14', '#343a40', '#6610f2'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    legend: {
-                        position: 'top',
-                    },
-                    // animation: {
-                    //     animateScale: false,
-                    //     animateRotate: false
-                    // }
-                }
-            });
-
-            
-            $('#lowStockModal').modal('show');
-        });
-    </script>
 </body>
 </html>

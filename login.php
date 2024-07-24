@@ -80,14 +80,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login and Register</title>
+    <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+           
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="text-center mt-5">Login</h2>
+    
+    <div class="col-md-3">
+                <img src="./images/Capture.PNG" alt="Company Logo" class="img-fluid">
+                
+            </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 login-container">
+                <h2 class="text-center">Login</h2>
                 <form method="POST" action="login.php" class="mt-4">
                     <input type="hidden" name="action" value="login">
                     <div class="form-group">
@@ -104,6 +120,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </div>
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2024 SATOR RWANDA Ltd. All rights reserved.</span>
+        </div>
+    </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

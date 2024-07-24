@@ -1,21 +1,21 @@
 <?php
-// Include necessary files and initialize database connection
+
 include('includes/nav_bar.php');
 include('includes/db.php');
 
-// Check if form is submitted via POST method
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Retrieve form data
+   
     $item_name = $_POST['item'];
     $item_type = $_POST['type'];
     $serial_number = isset($_POST['serial_number']) ? $_POST['serial_number'] : null;
     $imei = isset($_POST['imei']) ? $_POST['imei'] : null;
     $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : null;
   
-    // Get current timestamp for creation date
+    
     $creation_date = date("Y-m-d H:i:s");
 
-    // Validate serial number and IMEI based on item type
+   
     if ($item_name == "SPEED GOVERNORS") {
         if ($item_type == "SPG 001") {
             if (!empty($serial_number) && !preg_match('/^[A-Za-z]{2}\d{12}$/', $serial_number)) {
@@ -37,11 +37,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Set quantity to 1 if serial number is provided
+ 
     if (!empty($serial_number)) {
         $quantity = 1;
     } else {
-        $serial_number = null; // Set serial number to null if not provided
+        $serial_number = null; 
     }
 
     // Prepare INSERT query
