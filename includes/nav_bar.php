@@ -28,7 +28,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
         <a class="navbar-brand" href="#">
-            <img src="./images/Capture.PNG" alt="Logo"> 
+            <img src="../images/Capture.PNG" alt="Logo"> 
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -36,18 +36,18 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="admin_home.php">Home</a>
+                    <a class="nav-link" href="../dashboard/admin_home.php">Home</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Items
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown1">
-                        <a class="dropdown-item" href="add_item.php">Add Item</a>
-                        <a class="dropdown-item" href="view_all_item.php">New items</a>
-                        <a class="dropdown-item" href="returned_form.php">Return item</a>
-                        <a class="dropdown-item" href="view_repair_item.php">Repaired Items</a>
-                        <a class="dropdown-item" href="view_non_repair_item.php">Non_Repair Items</a>
+                        <a class="dropdown-item" href="../stock/add_item.php">Add Item</a>
+                        <a class="dropdown-item" href="../stock/view_all_item.php">New items</a>
+                        <a class="dropdown-item" href="../stock/returned_form.php">Return item</a>
+                        <a class="dropdown-item" href="../stock/view_repair_item.php">Repaired Items</a>
+                        <a class="dropdown-item" href="../stock/view_non_repair_item.php">Non_Repair Items</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -56,8 +56,8 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown2">
                         
-                        <a class="dropdown-item" href="admin_request_list.php">Requests List</a>
-                        <a class="dropdown-item" href="view_out_in_stock.php">View Out in stock</a>
+                        <a class="dropdown-item" href="../requests/admin_request_list.php">Requests List</a>
+                        <a class="dropdown-item" href="../stock/view_out_in_stock.php">View Out in stock</a>
                         
                         
                     </div>
@@ -67,11 +67,11 @@
                        Report
                     </a>
                     <div class="dropdown-menu" aria-labelledby="itemsDropdown3">
-                        <a class="dropdown-item" href="report.php">Stock Report</a>
+                        <a class="dropdown-item" href="../reports/daily_report.php">Stock Report</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout.php">Logout</a>
+                    <a class="nav-link" href="../logout.php">Logout</a>
                 </li>
             </ul>
         </div>
