@@ -1,8 +1,11 @@
 <?php
-include(__DIR__ . '/../includes/nav_bar.php');
 session_start();
-include(__DIR__ . '/../includes/db.php');
-
+include(__DIR__ . '/../includes/nav_bar.php');
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 $itemTypes = array(
     'SPEED GOVERNORS' => ['SPG 001', 'Only SPG 001 Without Antenna', 'Only SPG 001 Without Display', 'Only SPG 001 Without Antenna and Display', 'R0SCO', 'R0SCO Not Working', 'SG 001 Not Working'],
     'GPS TRACKERS' => ['TK 116', 'TK 119', 'TK 419', 'TK 115', 'MT02S', 'GUT 810G1_Fluel', 'GT06E/teltonika', 'FMB125', 'Gps Not Working/MT02S', 'GPS Not Working'],
@@ -80,6 +83,7 @@ $mysqli->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Items Return Form</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {

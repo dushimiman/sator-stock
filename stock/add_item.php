@@ -1,7 +1,11 @@
 <?php
+session_start();
 include(__DIR__ . '/../includes/nav_bar.php');
-include(__DIR__ . '/../includes/db.php'); // Ensure this initializes $mysqli
-
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item_name = $_POST['item'];
     $item_type = $_POST['type'];
@@ -69,6 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Add Item to Stock</title>
+    <link rel="icon" href="../images/stock-icon.png" type="image/x-icon"> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">

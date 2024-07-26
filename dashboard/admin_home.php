@@ -48,7 +48,7 @@ $mysqli->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Management Dashboard</title>
-    
+    <link rel="icon" href="../images/stock-icon.png" type="image/x-icon"> 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -115,7 +115,7 @@ $mysqli->close();
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="dropdown-menu" aria-labelledby="userDropdown">
-                    <a class="dropdown-item" href="#">Logout</a>
+                    <a class="dropdown-item" href="../logout.php">Logout</a>
                 </div>
             </div>
         </div>
@@ -237,17 +237,20 @@ window.onload = function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            title: {
+                display: true,
+                text: 'Items in Stock by Type'
+            }
         }
     });
 
     <?php if ($result_low_stock_items->num_rows > 0): ?>
-        $('#lowStockModal').modal('show');
+    $('#lowStockModal').modal('show');
     <?php endif; ?>
 };
-
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </body>

@@ -1,14 +1,18 @@
 <?php
+session_start();
 include(__DIR__ . '/../includes/nav_bar.php');
 include(__DIR__ . '/../includes/db.php'); 
-
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 
 function approveRequest($mysqli, $request_id) {
     $sql = "UPDATE requests SET status = 'approved' WHERE id = ?";
     $stmt = $mysqli->prepare($sql);
     $stmt->bind_param("i", $request_id);
-    
+
     if ($stmt->execute()) {
         return true;
     } else {
@@ -16,15 +20,11 @@ function approveRequest($mysqli, $request_id) {
     }
 }
 
-if (!isset($mysqli)) {
-    die("Database connection failed.");
-}
-
 $sql = "SELECT * FROM requests";
 
 if (!empty($searchTerm)) {
     $searchTerm = $mysqli->real_escape_string($searchTerm);
-    $sql .= " WHERE requested_by LIKE '%$searchTerm%' OR item_name LIKE '%$searchTerm%' ";
+    $sql .= " WHERE requested_by LIKE '%$searchTerm%' OR item_name LIKE '%$searchTerm%'";
 }
 
 $result = $mysqli->query($sql);
@@ -39,12 +39,17 @@ if ($result === false) {
 <head>
     <meta charset="UTF-8">
     <title>All Requests</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .btn-out-success {
             background-color: #28a745 !important; 
             border-color: #28a745 !important;
+        }
+        .btn-out-stock {
+            background-color: #dc3545 !important; 
+            border-color: #dc3545 !important;
         }
     </style>
 </head>
@@ -81,14 +86,8 @@ if ($result === false) {
                         echo "<td>" . $row['quantity'] . "</td>";
                         echo "<td>" . $row['status'] . "</td>";
                         echo "<td>";
-
-                        if ($row['status'] === 'pending') {
-                            echo "<span class='text-muted'>Pending Approval</span>";
-                        } elseif ($row['status'] === 'approved') {
-                            echo "<a class='btn btn-warning btn-sm btn-out-success' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>";
-                        }
-
-                        echo "<a class='btn btn-primary btn-sm ml-1' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
+                        echo "<a class='btn btn-warning btn-sm btn-out-success' href='out_item_form.php?id=" . $row['id'] . "'>Out Item</a>";
+                        // echo "<a class='btn btn-danger btn-sm btn-out-stock ml-1' href='out_stock.php?id=" . $row['id'] . "'>Out of Stock</a>";
                         echo "</td>";
                         echo "</tr>";
                     }

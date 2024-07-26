@@ -1,18 +1,20 @@
 
 <?php
-include('includes/user_nav_bar.php');
 session_start();
-
-if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2) {
-    header("Location: login.php");
+include(__DIR__ . '/../includes/nav_bar.php');
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
     exit();
 }
+
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>User Home</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -21,8 +23,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2) {
             <div class="col-md-8">
                 <h2 class="text-center mt-5">User Home</h2>
                 <div class="list-group mt-4">
-                    <a href="request_form.php" class="list-group-item list-group-item-action">Request Form</a>
-                    <a href="user_request.php" class="list-group-item list-group-item-action">View Your Requisitions</a>
+                    <a href="../requests/request_form.php" class="list-group-item list-group-item-action">Request Form</a>
+                    <a href="../requests/user_request.php" class="list-group-item list-group-item-action">View Your Requisitions</a>
                 </div>
             </div>
         </div>

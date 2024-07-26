@@ -1,9 +1,16 @@
-<?php include('includes/user_nav_bar.php'); ?>
+<?php session_start();
+include(__DIR__ . '/../includes/user_nav_bar.php');
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+} ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Requisition Form</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -65,6 +72,9 @@
                 <label for="reasons">Reasons for Request:</label>
                 <textarea id="reasons" name="reasons" class="form-control"></textarea>
             </div>
+
+            <!-- Hidden field to set the default status -->
+            <input type="hidden" name="status" value="Pending">
 
             <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>

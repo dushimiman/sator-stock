@@ -1,7 +1,11 @@
 <?php
-include('includes/nav_bar.php');
-include('includes/db.php');
-
+session_start();
+include(__DIR__ . '/../includes/nav_bar.php');
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 function viewReturnedItems($conn, $search = '') {
     $sql = "SELECT * FROM returned_items";
     
@@ -51,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Returned Items</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>

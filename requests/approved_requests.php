@@ -1,11 +1,16 @@
 <?php
-include('includes/db.php');
-
+session_start();
+include(__DIR__ . '/../includes/nav_bar.php');
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 $sql = "SELECT * FROM requests WHERE status = 'approved'";
-$result = $conn->query($sql);
+$result = $mysqli->query($sql);
 
 if ($result === false) {
-    die("Error executing the query: " . $conn->error);
+    die("Error executing the query: " . $mysqli->error);
 }
 ?>
 
@@ -13,6 +18,7 @@ if ($result === false) {
 <html>
 <head>
     <title>Approved Requests</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
 </head>
 <body>
     <h2>Approved Requests</h2>
@@ -48,5 +54,5 @@ if ($result === false) {
 </html>
 
 <?php
-$conn->close();
+$mysqli->close();
 ?>

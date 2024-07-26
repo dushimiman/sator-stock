@@ -14,25 +14,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
 
-            if ($user) {
-                if (password_verify($password, $user['password_hash'])) {
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['username'] = $username;
-                    $_SESSION['role'] = $user['role'];
+            if ($user && password_verify($password, $user['password_hash'])) {
+                // Set session variables
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $username;
+                $_SESSION['role'] = $user['role'];
 
-                    if ($user['id'] == 1) {
+                // Redirect based on role
+                switch ($user['role']) {
+                    case 'admin':
                         header("Location: dashboard/admin_home.php");
-                    } elseif ($user['id'] == 2) {
+                        break;
+                    case 'user':
                         header("Location: dashboard/user_home.php");
-                    } elseif ($user['id'] == 3) {
-                        header("Location: request_list.php");  
-                    } else {
+                        break;
+                    case 'requester':
+                        header("Location: requests/request_list.php");
+                        break;
+                    default:
                         echo "Unknown role.";
-                    }
-                    exit();
-                } else {
-                    echo "Incorrect username or password.";
+                        break;
                 }
+                exit();
             } else {
                 echo "Incorrect username or password.";
             }
@@ -72,8 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Stock Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="icon" href="../images/stock-icon.png" type="image/x-icon">
     <style>
         .login-container {
             max-width: 400px;
@@ -83,11 +87,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             bottom: 0;
             width: 100%;
         }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 150px;
+            margin-right:70em;
+        }
+        .stock-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="col-md-3">
+        <div class="logo">
             <img src="./images/Capture.PNG" alt="Company Logo" class="img-fluid">
         </div>
         <div class="row justify-content-center mt-5">

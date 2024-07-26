@@ -1,14 +1,18 @@
 <?php
+session_start();
 include(__DIR__ . '/../includes/nav_bar.php');
-include(__DIR__ . '/../includes/db.php');
-
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $sql = "SELECT * FROM requests WHERE id = ?";
-    $stmt = $conn->prepare($sql);
+    $stmt = $mysqli->prepare($sql);
 
     if ($stmt === false) {
-        die("Error preparing the query: " . $conn->error);
+        die("Error preparing the query: " . $mysqli->error);
     }
 
     $stmt->bind_param("i", $id);
@@ -25,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = $_POST['quantity'];
     $errors = [];
 
-    $conn->begin_transaction();
+    $mysqli->begin_transaction();
 
     try {
         if ($item_name === 'GPS TRACKERS') {
@@ -38,9 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sql = "SELECT id, item_name, imei FROM stock WHERE item_name = 'GPS TRACKERS' AND LOWER(imei) = LOWER(?)
                         UNION
                         SELECT id, item_name, imei FROM returned_items WHERE item_name = 'GPS TRACKERS' AND LOWER(imei) = LOWER(?)";
-                $stmt = $conn->prepare($sql);
+                $stmt = $mysqli->prepare($sql);
                 if ($stmt === false) {
-                    throw new Exception("Error preparing the query: " . $conn->error);
+                    throw new Exception("Error preparing the query: " . $mysqli->error);
                 }
                 $stmt->bind_param("ss", $imei, $imei);
                 $stmt->execute();
@@ -52,12 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                     if ($item['id']) {
                         $deleteSql = "DELETE FROM stock WHERE imei = ? AND item_name = ? LIMIT 1";
-                        $deleteStmt = $conn->prepare($deleteSql);
+                        $deleteStmt = $mysqli->prepare($deleteSql);
                         $deleteStmt->bind_param("ss", $imei, $item_name);
                         $deleteStmt->execute();
                         if ($deleteStmt->affected_rows === 0) {
                             $deleteSql = "DELETE FROM returned_items WHERE imei = ? AND item_name = ? LIMIT 1";
-                            $deleteStmt = $conn->prepare($deleteSql);
+                            $deleteStmt = $mysqli->prepare($deleteSql);
                             $deleteStmt->bind_param("ss", $imei, $item_name);
                             $deleteStmt->execute();
                         }
@@ -65,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     
                     $insertSql = "INSERT INTO out_in_stock (item_name, imei) VALUES (?, ?)";
-                    $insertStmt = $conn->prepare($insertSql);
+                    $insertStmt = $mysqli->prepare($insertSql);
                     $insertStmt->bind_param("ss", $item_name, $imei);
                     $insertStmt->execute();
                     $insertStmt->close();
@@ -82,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sql = "SELECT id, item_name, serial_number FROM stock WHERE item_name = 'SPEED GOVERNORS' AND LOWER(serial_number) = LOWER(?)
                         UNION
                         SELECT id, item_name, serial_number FROM returned_items WHERE item_name = 'SPEED GOVERNORS' AND LOWER(serial_number) = LOWER(?)";
-                $stmt = $conn->prepare($sql);
+                $stmt = $mysqli->prepare($sql);
                 if ($stmt === false) {
-                    throw new Exception("Error preparing the query: " . $conn->error);
+                    throw new Exception("Error preparing the query: " . $mysqli->error);
                 }
                 $stmt->bind_param("ss", $serial_number, $serial_number);
                 $stmt->execute();
@@ -96,12 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if ($item['id']) {
                         $deleteSql = "DELETE FROM stock WHERE serial_number = ? AND item_name = ? LIMIT 1";
-                        $deleteStmt = $conn->prepare($deleteSql);
+                        $deleteStmt = $mysqli->prepare($deleteSql);
                         $deleteStmt->bind_param("ss", $serial_number, $item_name);
                         $deleteStmt->execute();
                         if ($deleteStmt->affected_rows === 0) {
                             $deleteSql = "DELETE FROM returned_items WHERE serial_number = ? AND item_name = ? LIMIT 1";
-                            $deleteStmt = $conn->prepare($deleteSql);
+                            $deleteStmt = $mysqli->prepare($deleteSql);
                             $deleteStmt->bind_param("ss", $serial_number, $item_name);
                             $deleteStmt->execute();
                         }
@@ -109,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                    
                     $insertSql = "INSERT INTO out_in_stock (item_name, serial_number) VALUES (?, ?)";
-                    $insertStmt = $conn->prepare($insertSql);
+                    $insertStmt = $mysqli->prepare($insertSql);
                     $insertStmt->bind_param("ss", $item_name, $serial_number);
                     $insertStmt->execute();
                     $insertStmt->close();
@@ -119,9 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
        
             $sql = "SELECT quantity FROM stock WHERE item_name = ?";
-            $stmt = $conn->prepare($sql);
+            $stmt = $mysqli->prepare($sql);
             if ($stmt === false) {
-                throw new Exception("Error preparing the query: " . $conn->error);
+                throw new Exception("Error preparing the query: " . $mysqli->error);
             }
             $stmt->bind_param("s", $item_name);
             $stmt->execute();
@@ -137,18 +141,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $new_quantity = $item['quantity'] - $quantity;
 
                     $updateSql = "UPDATE stock SET quantity = ? WHERE item_name = ?";
-                    $updateStmt = $conn->prepare($updateSql);
+                    $updateStmt = $mysqli->prepare($updateSql);
                     if ($updateStmt === false) {
-                        throw new Exception("Error preparing the update query: " . $conn->error);
+                        throw new Exception("Error preparing the update query: " . $mysqli->error);
                     }
                     $updateStmt->bind_param("is", $new_quantity, $item_name);
                     $updateStmt->execute();
                     $updateStmt->close();
 
                     $insertSql = "INSERT INTO out_in_stock (item_name, quantity) VALUES (?, ?)";
-                    $insertStmt = $conn->prepare($insertSql);
+                    $insertStmt = $mysqli->prepare($insertSql);
                     if ($insertStmt === false) {
-                        throw new Exception("Error preparing the insert query: " . $conn->error);
+                        throw new Exception("Error preparing the insert query: " . $mysqli->error);
                     }
                     $insertStmt->bind_param("si", $item_name, $quantity);
                     $insertStmt->execute();
@@ -159,16 +163,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
-            $conn->commit();
+            $mysqli->commit();
             echo "Item successfully outed in stock.";
         } else {
-            $conn->rollback();
+            $mysqli->rollback();
             foreach ($errors as $error) {
                 echo "<p>$error</p>";
             }
         }
     } catch (Exception $e) {
-        $conn->rollback();
+        $mysqli->rollback();
         echo "<p>Error: " . $e->getMessage() . "</p>";
     }
 }
@@ -178,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Out Item in Stock</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
 </head>
 <body>
     <h2>Out Item in Stock</h2>

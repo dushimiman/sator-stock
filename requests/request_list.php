@@ -1,10 +1,15 @@
 <?php
-include('includes/db.php');
+session_start();
 
-function checkItemAvailability($conn, $item_name, $requested_quantity) {
-    $stmt = $conn->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
+function checkItemAvailability($mysqli, $item_name, $requested_quantity) {
+    $stmt = $mysqli->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
     if (!$stmt) {
-        die("Error preparing stock query: " . $conn->error);
+        die("Error preparing stock query: " . $mysqli->error);
     }
     $stmt->bind_param("s", $item_name);
     $stmt->execute();
@@ -19,8 +24,9 @@ function checkItemAvailability($conn, $item_name, $requested_quantity) {
     return $total_quantity >= $requested_quantity;
 }
 
-function approveRequest($conn, $request_id) {
-    $stmt = $conn->prepare("SELECT * FROM requests WHERE id = ?");
+// Approve request
+function approveRequest($mysqli, $request_id) {
+    $stmt = $mysqli->prepare("SELECT * FROM requests WHERE id = ?");
     $stmt->bind_param("i", $request_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -30,18 +36,18 @@ function approveRequest($conn, $request_id) {
         $item_name = $request['item_name'];
         $requested_quantity = $request['quantity'];
 
-        if (checkItemAvailability($conn, $item_name, $requested_quantity)) {
-            $stmt = $conn->prepare("UPDATE requests SET status = 'approved' WHERE id = ?");
+        if (checkItemAvailability($mysqli, $item_name, $requested_quantity)) {
+            $stmt = $mysqli->prepare("UPDATE requests SET status = 'approved' WHERE id = ?");
             $stmt->bind_param("i", $request_id);
 
             if ($stmt->execute()) {
                 echo "Request approved successfully for item '$item_name'.";
                 return true;
             } else {
-                echo "Error updating request status: " . $conn->error;
+                echo "Error updating request status: " . $mysqli->error;
             }
         } else {
-            $stmt = $conn->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
+            $stmt = $mysqli->prepare("SELECT SUM(quantity) AS total_quantity FROM stock WHERE item_name = ?");
             $stmt->bind_param("s", $item_name);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -57,9 +63,10 @@ function approveRequest($conn, $request_id) {
     return false;
 }
 
+// Handle approve action
 if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id'])) {
-    $request_id = $_GET['id'];
-    if (approveRequest($conn, $request_id)) {
+    $request_id = intval($_GET['id']);
+    if (approveRequest($mysqli, $request_id)) {
         header("Location: request_list.php");
         exit();
     } else {
@@ -67,18 +74,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'Approve' && isset($_GET['id']
     }
 }
 
+// Search requests
 $searchTerm = '';
 if (isset($_GET['search'])) {
-    $searchTerm = $conn->real_escape_string($_GET['search']);
+    $searchTerm = $mysqli->real_escape_string($_GET['search']);
     $sql = "SELECT * FROM requests WHERE requested_by LIKE '%$searchTerm%' OR item_name LIKE '%$searchTerm%'";
 } else {
     $sql = "SELECT * FROM requests";
 }
 
-$result = $conn->query($sql);
+$result = $mysqli->query($sql);
 
 if ($result === false) {
-    die("Error executing the query: " . $conn->error);
+    die("Error executing the query: " . $mysqli->error);
 }
 ?>
 
@@ -87,6 +95,7 @@ if ($result === false) {
 <head>
     <meta charset="UTF-8">
     <title>All Requests</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
@@ -114,18 +123,20 @@ if ($result === false) {
                     <?php
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
+                            $id = intval($row['id']);
+                            $action_url = "?action=Approve&id=" . $id;
                             echo "<tr>";
-                            echo "<td>" . $row['id'] . "</td>";
-                            echo "<td>" . $row['requisition_date'] . "</td>";
-                            echo "<td>" . $row['requested_by'] . "</td>";
-                            echo "<td>" . $row['item_name'] . "</td>";
-                            echo "<td>" . $row['quantity'] . "</td>";
-                            echo "<td>" . $row['status'] . "</td>";
+                            echo "<td>" . htmlspecialchars($row['id']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['requisition_date']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['requested_by']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['item_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['quantity']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['status']) . "</td>";
                             echo "<td>";
                             if ($row['status'] == 'pending') {
-                                echo "<a class='btn btn-success btn-sm' href='?action=Approve&id=" . $row['id'] . "'>Approve</a> ";
+                                echo "<a class='btn btn-success btn-sm' href='$action_url'>Approve</a> ";
                             }
-                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $row['id'] . "'>View Details</a>";
+                            echo "<a class='btn btn-primary btn-sm' href='view_request.php?id=" . $id . "'>View Details</a>";
                             echo "</td>";
                             echo "</tr>";
                         }
@@ -145,5 +156,5 @@ if ($result === false) {
 </html>
 
 <?php
-$conn->close();
+$mysqli->close();
 ?>

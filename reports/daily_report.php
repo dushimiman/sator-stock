@@ -1,6 +1,11 @@
 <?php
+session_start();
 include(__DIR__ . '/../includes/nav_bar.php');
-include(__DIR__ . '/../includes/db.php');
+include(__DIR__ . '/../includes/db.php'); 
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+    header("Location: ../login.php"); 
+    exit();
+}
 
 $start_date = isset($_POST['start_date']) ? $_POST['start_date'] : '';
 $end_date = isset($_POST['end_date']) ? $_POST['end_date'] : '';
@@ -19,7 +24,7 @@ $result_requests = $mysqli->query($sql_requests);
 
 $sql_return = "SELECT item_name, returned_by, return_reason 
                FROM returned_items 
-               WHERE DATE(returned_date) BETWEEN '$start_date' AND '$end_date'";
+               WHERE DATE(creation_date) BETWEEN '$start_date' AND '$end_date'";
 $result_return = $mysqli->query($sql_return);
 
 $sql_out_in_stock = "SELECT item_name, SUM(quantity) AS total_quantity 
@@ -41,13 +46,13 @@ $mysqli->close();
 <head>
     <meta charset="UTF-8">
     <title>Stock Report</title>
+    <link rel="icon" href="./images/stock-icon.png" type="image/x-icon"> 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h5 class="mt-4">Stock Report</h5>
 
-        <!-- Form to select date range -->
         <form method="post" class="mt-4">
             <div class="form-row">
                 <div class="form-group col-md-4">
